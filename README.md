@@ -1,4 +1,4 @@
-# 𝑓ArtTS
+# 𝑓Artᴛꜱ
 
 > Functional Art(-making) TypeScript<br/>
 > by [Matt Hayes](https://github.com/mysterycommand)
