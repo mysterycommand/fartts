@@ -1,0 +1,9 @@
+{
+  "name": "fartts",
+  "version": "1.0.0",
+  "description": "𝑓Art.ᴛꜱ: Functional Art(-making) TypeScript",
+  "repository": "git@github.com:mysterycommand/fartts.git",
+  "author": "Matt Hayes <matt@mysterycommand.com> (http://mysterycommand.com/)",
+  "license": "MIT",
+  "private": true
+}
