@@ -14,7 +14,8 @@
   "scripts": {
     "lint": "yarn lint:ts ; yarn lint:scss",
     "lint:ts": "tslint 'source/**/*.ts'",
-    "lint:scss": "sass-lint -v 'source/**/*.scss'"
+    "lint:scss": "sass-lint -v 'source/**/*.scss'",
+    "test": "jest"
   },
   "dependencies": {},
   "devDependencies": {
