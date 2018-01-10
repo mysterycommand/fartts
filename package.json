@@ -22,6 +22,7 @@
     "@types/jest": "^22.0.1",
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.1.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^22.0.4",
     "node-sass": "^4.7.2",
     "parcel-bundler": "^1.4.1",
@@ -39,8 +40,24 @@
     }
   },
   "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": ["source/**/*.ts", "!**/node_modules/**"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    },
+    "mapCoverage": true,
     "moduleFileExtensions": ["ts", "js", "json"],
+    "moduleNameMapper": {
+      "^.+\\.s?css$": "identity-obj-proxy"
+    },
     "testMatch": ["<rootDir>/source/**/?(*.)test?(s).ts"],
-    "transform": { "^.+\\.ts$": "ts-jest" }
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    }
   }
 }
