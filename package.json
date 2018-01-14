@@ -16,7 +16,7 @@
     "lint:ts": "tslint 'source/**/*.ts'",
     "lint:scss": "sass-lint -v 'source/**/*.scss'",
     "test": "jest && cat ./coverage/lcov.info | yarn report",
-    "report": "([[ \"${CI}\" ]] && coveralls || exit 0)"
+    "report": "if [ \"${CI}\" ]; then (coveralls) fi"
   },
   "dependencies": {},
   "devDependencies": {
