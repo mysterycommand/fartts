@@ -1,4 +1,4 @@
 import './style.scss';
 
-const main = document.getElementById('main');
-export default () => true;
+// tslint:disable-next-line no-console
+console.dir(document.getElementById('main'));

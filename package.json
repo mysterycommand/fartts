@@ -45,7 +45,7 @@
   },
   "jest": {
     "collectCoverage": true,
-    "collectCoverageFrom": ["source/**/*.ts", "!**/node_modules/**"],
+    "collectCoverageFrom": ["source/**/*.ts", "!source/script.ts", "!**/node_modules/**"],
     "coverageThreshold": {
       "global": {
         "branches": 100,
