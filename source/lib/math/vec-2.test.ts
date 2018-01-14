@@ -40,6 +40,12 @@ describe('Vec2', () => {
     expect(d.y).toBe(0.5);
   });
 
+  it('scales', () => {
+    d = c.scaledBy(5);
+    expect(d.x).toBe(15);
+    expect(d.y).toBe(20);
+  });
+
   it('calculates distance', () => {
     expect(b.distanceTo(c)).toBe(sqrt(8));
     expect(a.distanceTo(c)).toBe(5);

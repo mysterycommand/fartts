@@ -28,6 +28,11 @@ export default class Vec2 {
     return new Vec2(x / v.x, y / v.y);
   }
 
+  public scaledBy(s: number): Vec2 {
+    const { x, y } = this;
+    return new Vec2(x * s, y * s);
+  }
+
   public distanceTo(v: Vec2): number {
     return v.minus(this).length;
   }
