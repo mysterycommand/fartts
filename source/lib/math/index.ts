@@ -1,1 +1,1 @@
-export const { hypot } = Math;
+export const { hypot, sqrt } = Math;
