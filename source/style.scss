@@ -14,3 +14,9 @@ main {
   align-items: center;
   justify-content: center;
 }
+
+canvas {
+  width: 800px;
+  height: 450px;
+  image-rendering: pixelated;
+}
