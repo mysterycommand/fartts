@@ -2,13 +2,13 @@ import Behavior from './behavior';
 import Constraint from './constraint';
 import Particle from './particle';
 
-const drag = 0.99;
+const drag = 0.25;
 
 export default class Aggregate {
-  public particles: Particle[];
+  public behaviors: Behavior[] = [];
+  public constraints: Constraint[] = [];
 
-  public behaviors: Behavior[];
-  public constraints: Constraint[];
+  public particles: Particle[] = [];
 
   public update() {
     // behaviors

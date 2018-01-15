@@ -3,13 +3,13 @@ import Behavior from './behavior';
 import Constraint from './constraint';
 
 export default class Particle {
-  public currentPosition = new Vec2();
-  public previousPosition = new Vec2();
+  public behaviors: Behavior[] = [];
+  public constraints: Constraint[] = [];
+
   public forces = new Vec2();
   public mass = 1;
 
-  public behaviors: Behavior[];
-  public constraints: Constraint[];
+  public constructor(public currentPosition = new Vec2(), public previousPosition = new Vec2()) {}
 
   public get velocity() {
     const { x: cx, y: cy } = this.currentPosition;
