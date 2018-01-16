@@ -14,7 +14,7 @@ export default class Aggregate {
     // behaviors
     this.behaviors.forEach(b => {
       this.particles.forEach(p => {
-        // b.apply(p);
+        b.apply(p);
       });
     });
 
