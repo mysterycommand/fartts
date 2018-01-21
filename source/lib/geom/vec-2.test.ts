@@ -1,3 +1,4 @@
+import { atan2, hypot, π } from '../math';
 import Vec2 from './vec-2';
 
 describe('Vec2', () => {
@@ -55,6 +56,30 @@ describe('Vec2', () => {
     expect(d.x).toBe(1);
     expect(d.y).toBe(2);
     expect(a).not.toBe(d);
+  });
+
+  it('creates vectors from polar coordinates', () => {
+    const a = Vec2.fromPolar();
+    const b = Vec2.fromPolar(atan2(4, 3), 5);
+    const c = Vec2.fromPolar(π / 2, 4);
+    const d = Vec2.fromPolar(π / 4, hypot(3, 3));
+
+    expect(a.x).toBe(0);
+    expect(a.y).toBe(0);
+
+    expect(b.x).toBeCloseTo(3);
+    expect(b.y).toBeCloseTo(4);
+
+    expect(c.x).toBeCloseTo(0);
+    expect(c.y).toBe(4);
+
+    expect(d.x).toBeCloseTo(3);
+    expect(d.y).toBe(3);
+  });
+
+  it('has an angle property', () => {
+    const v = new Vec2(3, 3);
+    expect(v.angle).toBe(π / 4);
   });
 
   it('has a length property', () => {
