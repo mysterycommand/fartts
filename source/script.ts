@@ -22,28 +22,60 @@ canvas.height = buffer.height = h;
 canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = false;
 
 // simulation
+const step = 1000 / 60;
+let drift = 0;
 
 // rendering
 
 // game-loop
 let frameId = -1;
 
-function tick(time: number): void {
+// resets everytime you click 'play'
+let firstTs = 0;
+let previousTs = 0;
+
+// calculated each frame, relative to first/previous frame (respectively)
+let normalTs = 0;
+let deltaTs = 0;
+
+function tick(ts: number): void {
   frameId = rAF(tick);
-  console.log(time); // tslint:disable-line
+
+  normalTs = ts - firstTs;
+  deltaTs = normalTs - previousTs;
+  previousTs = normalTs;
+  drift += deltaTs;
+
+  // do stuff with time/delta here
+  while (drift >= step) {
+    // update(step);
+    // drift -= step;
+  }
+  // draw(drift / step);
+  console.log(`${normalTs.toFixed(2)} : ${deltaTs.toFixed(2)}`); // tslint:disable-line
 }
 
 function play(): void {
   playStopButton.innerText = stopLabel;
   playStopButton.setAttribute('aria-label', 'stop');
-  frameId = rAF(tick);
+
+  frameId = rAF((ts: number) => {
+    firstTs = ts;
+    previousTs = 0;
+    drift = 0;
+
+    // draw(1);
+    frameId = rAF(tick);
+  });
 }
 
 function stop(): void {
   playStopButton.innerText = playLabel;
   playStopButton.setAttribute('aria-label', 'play');
+
   cAF(frameId);
   frameId = -1;
+  console.log('\n'); // tslint:disable-line
 }
 
 function toggle(): void {
