@@ -33,11 +33,13 @@ const maxSparks = 200;
 for (let i = 0; i < maxSparks; ++i) {
   const theta = ππ / maxSparks * i;
   const r = random() * 15 + 10;
+
   const x = cos(theta) * r;
   const y = sin(theta) * r;
 
   const curr = new Vec2(hw + x, hh + y);
   const prev = new Vec2(hw, hh);
+
   firework.particles.push(new Particle(curr, prev));
 }
 
@@ -54,6 +56,7 @@ function draw() {
   gravity.force.scale(1.05);
   firework.particles.forEach(p => {
     const { x, y } = p.currentPosition;
+
     bufferContext.moveTo(x, y);
     bufferContext.rect(x - 1, y - 1, 2, 2);
   });
