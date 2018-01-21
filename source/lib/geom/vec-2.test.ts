@@ -37,6 +37,26 @@ describe('Vec2', () => {
     expect(a).not.toBe(d);
   });
 
+  it('does static, non-mutating subtraction', () => {
+    const a = new Vec2(1, 2);
+    const b = new Vec2(3, 4);
+    const c = Vec2.sub(a, b);
+    const d = Vec2.sub(a, Vec2.ZERO);
+
+    expect(a.x).toBe(1);
+    expect(a.y).toBe(2);
+
+    expect(b.x).toBe(3);
+    expect(b.y).toBe(4);
+
+    expect(c.x).toBe(-2);
+    expect(c.y).toBe(-2);
+
+    expect(d.x).toBe(1);
+    expect(d.y).toBe(2);
+    expect(a).not.toBe(d);
+  });
+
   it('has a length property', () => {
     const v = new Vec2(3, 4);
     expect(v.length).toBe(5);
