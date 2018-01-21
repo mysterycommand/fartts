@@ -18,9 +18,16 @@ describe('Particle', () => {
 
   it("updates based on it's previous position", () => {
     const p = new Particle(Vec2.ZERO, Vec2.fromPolar(π, 1));
-    p.update();
 
+    expect(p.currentPosition.x).toBe(0);
+    expect(p.currentPosition.y).toBe(0);
+
+    p.update();
     expect(p.currentPosition.x).toBe(1);
+    expect(p.currentPosition.y).toBeCloseTo(0);
+
+    p.update();
+    expect(p.currentPosition.x).toBe(2);
     expect(p.currentPosition.y).toBeCloseTo(0);
   });
 });
