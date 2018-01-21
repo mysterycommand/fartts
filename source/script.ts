@@ -21,13 +21,35 @@ canvas.width = buffer.width = w;
 canvas.height = buffer.height = h;
 canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = false;
 
-// simulation
+/**
+ * SIMULATION
+ */
 const step = 1000 / 60;
 let drift = 0;
 
-// rendering
+/**
+ * update: updates the simulation
+ * @param dt {number} - the number of miliseconds to simulate
+ */
+function update(dt: number): void {
+  console.log('update'); // tslint:disable-line
+}
 
-// game-loop
+/**
+ * RENDERING
+ */
+
+/**
+ * draw: renders a frame to the canvas
+ * @param ip {number} - the 'interpolation percentage', that is the amount of time that has yet to be simulated this frame
+ */
+function draw(ip: number): void {
+  console.log('draw'); // tslint:disable-line
+}
+
+/**
+ * GAME-LOOP
+ */
 let frameId = -1;
 
 // resets everytime you click 'play'
