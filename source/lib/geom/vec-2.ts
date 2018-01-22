@@ -12,6 +12,10 @@ export default class Vec2 {
     return new Vec2(a.x - b.x, a.y - b.y);
   }
 
+  public static scale(v: Vec2, s: number): Vec2 {
+    return new Vec2(v.x * s, v.y * s);
+  }
+
   public static lerp(a: Vec2, b: Vec2, i: number): Vec2 {
     const { x: ax, y: ay } = a;
     const { x: bx, y: by } = b;

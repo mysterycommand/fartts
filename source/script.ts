@@ -38,7 +38,7 @@ const p = new Particle(new Vec2(1, centerY), new Vec2(0, centerY));
  * @param t {number} - the number of miliseconds to simulate
  */
 function update(t: number): void {
-  p.update();
+  p.update(t);
 }
 
 /**
