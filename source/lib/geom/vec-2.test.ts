@@ -58,6 +58,19 @@ describe('Vec2', () => {
     expect(a).not.toBe(d);
   });
 
+  it('does static, non-mutating linear interpolation', () => {
+    const a = new Vec2(1, 2);
+    const b = new Vec2(3, 4);
+    const c = Vec2.lerp(a, b, 0.5);
+    const d = Vec2.lerp(a, Vec2.ZERO, 0.25);
+
+    expect(c.x).toBe(2);
+    expect(c.y).toBe(3);
+
+    expect(d.x).toBe(0.25);
+    expect(d.y).toBe(0.5);
+  });
+
   it('creates vectors from polar coordinates', () => {
     const a = Vec2.fromPolar();
     const b = Vec2.fromPolar(atan2(4, 3), 5);

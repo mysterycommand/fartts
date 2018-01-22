@@ -16,6 +16,14 @@ describe('Particle', () => {
     expect(velocity.y).toBe(0);
   });
 
+  it("can interpolate it's position relative to it's previous one", () => {
+    const p = new Particle(Vec2.ZERO, Vec2.UNIT);
+    const v = p.getInterpolatedPosition(0.5);
+
+    expect(v.x).toBe(0.5);
+    expect(v.y).toBe(0.5);
+  });
+
   it("updates based on it's previous position", () => {
     const p = new Particle(Vec2.ZERO, Vec2.fromPolar(π, 1));
 
