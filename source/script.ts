@@ -66,8 +66,6 @@ function draw(i: number): void {
   canvasContext.drawImage(buffer, 0, 0);
 }
 
-draw(1);
-
 /**
  * GAME-LOOP
  */
@@ -107,7 +105,6 @@ function play(): void {
     previousTime = 0;
     simulationExcess = 0;
 
-    draw(1);
     frameId = rAF(tick);
   });
 }
@@ -120,8 +117,17 @@ function stop(): void {
   frameId = -1;
 }
 
+function goto(f: number): void {
+  for (let i = 0; i < f; ++i) {
+    update(simulationStep);
+  }
+
+  draw(1);
+}
+
 function toggle(): void {
   frameId === -1 ? play() : stop();
 }
 
 playStopButton.addEventListener('click', toggle);
+goto(0);
