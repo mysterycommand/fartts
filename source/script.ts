@@ -86,17 +86,16 @@ function tick(time: number): void {
 
   normalTime = time - firstTime;
   deltaTime = normalTime - previousTime;
+
   previousTime = normalTime;
   simulationExcess += deltaTime;
 
-  // do stuff with time/delta here
   while (simulationExcess >= simulationStep) {
     update(simulationStep);
     simulationExcess -= simulationStep;
   }
 
   draw(simulationExcess / simulationStep);
-  console.log(`${normalTime.toFixed(2)} : ${deltaTime.toFixed(2)}`); // tslint:disable-line
 }
 
 function play(): void {
@@ -119,7 +118,6 @@ function stop(): void {
 
   cAF(frameId);
   frameId = -1;
-  console.log('\n'); // tslint:disable-line
 }
 
 function toggle(): void {

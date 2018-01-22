@@ -12,15 +12,15 @@ export default class Particle {
   }
 
   public update(): void {
-    const { currentPosition: c, previousPosition: p, velocity: v } = this;
+    const { currentPosition, previousPosition, velocity } = this;
 
     // behaviors: drag, friction (ground), gravity, etc...
 
-    p.x = c.x;
-    p.y = c.y;
+    previousPosition.x = currentPosition.x;
+    previousPosition.y = currentPosition.y;
 
-    c.x += v.x;
-    c.y += v.y;
+    currentPosition.x += velocity.x;
+    currentPosition.y += velocity.y;
 
     // constraints: distance, bounds, etc...
   }
