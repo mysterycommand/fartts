@@ -7,7 +7,7 @@ export default class Particle {
     return Vec2.sub(this.currentPosition, this.previousPosition);
   }
 
-  public interpolatePosition(i: number): Vec2 {
+  public getInterpolatedPosition(i: number): Vec2 {
     return Vec2.lerp(this.currentPosition, this.previousPosition, i);
   }
 

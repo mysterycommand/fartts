@@ -16,28 +16,28 @@ const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
 const buffer = document.createElement('canvas') as HTMLCanvasElement;
 const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
 
-const w = canvas.clientWidth / 5;
-const h = canvas.clientHeight / 5;
-const hw = w / 2;
-const hh = h / 2;
+const stageWidth = canvas.clientWidth / 5;
+const stageHeight = canvas.clientHeight / 5;
+const centerX = stageWidth / 2;
+const centerY = stageHeight / 2;
 
-canvas.width = buffer.width = w;
-canvas.height = buffer.height = h;
+canvas.width = buffer.width = stageWidth;
+canvas.height = buffer.height = stageHeight;
 canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = false;
 
 /**
  * SIMULATION
  */
-const step = 1000 / 60;
-let drift = 0;
+const simulationStep = 1000 / 60;
+let simulationExcess = 0;
 
-const p = new Particle(new Vec2(1, hh), new Vec2(0, hh));
+const p = new Particle(new Vec2(1, centerY), new Vec2(0, centerY));
 
 /**
  * update: updates the simulation
- * @param dt {number} - the number of miliseconds to simulate
+ * @param t {number} - the number of miliseconds to simulate
  */
-function update(dt: number): void {
+function update(t: number): void {
   p.update();
 }
 
@@ -47,12 +47,13 @@ function update(dt: number): void {
 
 /**
  * draw: renders a frame to the canvas
- * @param ip {number} - the 'interpolation percentage', that is the amount of time that has yet to be simulated this frame
+ * @param i {number} - the 'interpolation percentage' is the amount of time that
+ * has yet to be simulated this frame as a percentage of the simulation step
  */
-function draw(ip: number): void {
-  bufferContext.clearRect(0, 0, w, h);
+function draw(i: number): void {
+  bufferContext.clearRect(0, 0, stageWidth, stageHeight);
 
-  const { x, y } = p.interpolatePosition(ip);
+  const { x, y } = p.getInterpolatedPosition(i);
 
   bufferContext.beginPath();
   bufferContext.arc(x, y, 3, 0, ππ);
@@ -61,7 +62,7 @@ function draw(ip: number): void {
   bufferContext.strokeStyle = 'darkred';
   bufferContext.stroke();
 
-  canvasContext.clearRect(0, 0, w, h);
+  canvasContext.clearRect(0, 0, stageWidth, stageHeight);
   canvasContext.drawImage(buffer, 0, 0);
 }
 
@@ -73,39 +74,39 @@ draw(1);
 let frameId = -1;
 
 // resets everytime you click 'play'
-let firstTs = 0;
-let previousTs = 0;
+let firstTime = 0;
+let previousTime = 0;
 
 // calculated each frame, relative to first/previous frame (respectively)
-let normalTs = 0;
-let deltaTs = 0;
+let normalTime = 0;
+let deltaTime = 0;
 
-function tick(ts: number): void {
+function tick(time: number): void {
   frameId = rAF(tick);
 
-  normalTs = ts - firstTs;
-  deltaTs = normalTs - previousTs;
-  previousTs = normalTs;
-  drift += deltaTs;
+  normalTime = time - firstTime;
+  deltaTime = normalTime - previousTime;
+  previousTime = normalTime;
+  simulationExcess += deltaTime;
 
   // do stuff with time/delta here
-  while (drift >= step) {
-    update(step);
-    drift -= step;
+  while (simulationExcess >= simulationStep) {
+    update(simulationStep);
+    simulationExcess -= simulationStep;
   }
 
-  draw(drift / step);
-  console.log(`${normalTs.toFixed(2)} : ${deltaTs.toFixed(2)}`); // tslint:disable-line
+  draw(simulationExcess / simulationStep);
+  console.log(`${normalTime.toFixed(2)} : ${deltaTime.toFixed(2)}`); // tslint:disable-line
 }
 
 function play(): void {
   playStopButton.innerText = stopLabel;
   playStopButton.setAttribute('aria-label', 'stop');
 
-  frameId = rAF((ts: number) => {
-    firstTs = ts;
-    previousTs = 0;
-    drift = 0;
+  frameId = rAF((time: number) => {
+    firstTime = time;
+    previousTime = 0;
+    simulationExcess = 0;
 
     draw(1);
     frameId = rAF(tick);
