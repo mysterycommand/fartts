@@ -1,5 +1,9 @@
 import './style.scss';
 
+import Vec2 from './lib/geom/vec-2';
+import { ππ } from './lib/math';
+import Particle from './lib/physics/particle';
+
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
 const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
@@ -27,12 +31,14 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 const step = 1000 / 60;
 let drift = 0;
 
+const p = new Particle(new Vec2(1, hh), new Vec2(0, hh));
+
 /**
  * update: updates the simulation
  * @param dt {number} - the number of miliseconds to simulate
  */
 function update(dt: number): void {
-  console.log('update'); // tslint:disable-line
+  p.update();
 }
 
 /**
@@ -44,8 +50,24 @@ function update(dt: number): void {
  * @param ip {number} - the 'interpolation percentage', that is the amount of time that has yet to be simulated this frame
  */
 function draw(ip: number): void {
-  console.log('draw'); // tslint:disable-line
+  bufferContext.clearRect(0, 0, w, h);
+
+  const { currentPosition: { x: cx, y: cy }, previousPosition: { x: px, y: py } } = p;
+  const x = px + (cx - px) * ip;
+  const y = py + (cy - py) * ip;
+
+  bufferContext.beginPath();
+  bufferContext.arc(x, y, 3, 0, ππ);
+  bufferContext.closePath();
+
+  bufferContext.strokeStyle = 'darkred';
+  bufferContext.stroke();
+
+  canvasContext.clearRect(0, 0, w, h);
+  canvasContext.drawImage(buffer, 0, 0);
 }
+
+draw(1);
 
 /**
  * GAME-LOOP
@@ -70,10 +92,11 @@ function tick(ts: number): void {
 
   // do stuff with time/delta here
   while (drift >= step) {
-    // update(step);
-    // drift -= step;
+    update(step);
+    drift -= step;
   }
-  // draw(drift / step);
+
+  draw(drift / step);
   console.log(`${normalTs.toFixed(2)} : ${deltaTs.toFixed(2)}`); // tslint:disable-line
 }
 
@@ -86,7 +109,7 @@ function play(): void {
     previousTs = 0;
     drift = 0;
 
-    // draw(1);
+    draw(1);
     frameId = rAF(tick);
   });
 }
