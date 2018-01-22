@@ -12,9 +12,20 @@ export default class Vec2 {
     return new Vec2(a.x - b.x, a.y - b.y);
   }
 
+  public static lerp(a: Vec2, b: Vec2, i: number): Vec2 {
+    const { x: ax, y: ay } = a;
+    const { x: bx, y: by } = b;
+
+    const x = bx + (ax - bx) * i;
+    const y = by + (ay - by) * i;
+
+    return new Vec2(x, y);
+  }
+
   public static fromPolar(angle = 0, radius = 0): Vec2 {
     const x = cos(angle) * radius;
     const y = sin(angle) * radius;
+
     return new Vec2(x, y);
   }
 

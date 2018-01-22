@@ -52,9 +52,7 @@ function update(dt: number): void {
 function draw(ip: number): void {
   bufferContext.clearRect(0, 0, w, h);
 
-  const { currentPosition: { x: cx, y: cy }, previousPosition: { x: px, y: py } } = p;
-  const x = px + (cx - px) * ip;
-  const y = py + (cy - py) * ip;
+  const { x, y } = p.interpolatePosition(ip);
 
   bufferContext.beginPath();
   bufferContext.arc(x, y, 3, 0, ππ);
