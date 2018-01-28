@@ -71,6 +71,19 @@ describe('Vec2', () => {
     expect(d.y).toBe(0.5);
   });
 
+  it('does static, non-mutating scalar scaling', () => {
+    const a = new Vec2(1, 2);
+    const b = new Vec2(3, 4);
+    const c = Vec2.scale(a, 0.5);
+    const d = Vec2.scale(b, 2);
+
+    expect(c.x).toBe(0.5);
+    expect(c.y).toBe(1);
+
+    expect(d.x).toBe(6);
+    expect(d.y).toBe(8);
+  });
+
   it('creates vectors from polar coordinates', () => {
     const a = Vec2.fromPolar();
     const b = Vec2.fromPolar(atan2(4, 3), 5);

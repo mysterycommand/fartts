@@ -35,10 +35,12 @@ export default class Vec2 {
 
   public constructor(public x = 0, public y = 0) {}
 
+  // ρ
   public get length() {
     return hypot(this.x, this.y);
   }
 
+  // θ
   public get angle() {
     return atan2(this.y, this.x);
   }

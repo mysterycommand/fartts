@@ -31,14 +31,36 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 const simulationStep = 1000 / 60;
 let simulationExcess = 0;
 
-const p = new Particle(new Vec2(1, centerY), new Vec2(0, centerY));
+// TODO: factor this out into a gravity (or maybe just general acceleration) behavior
+const gravity = new Vec2(0, 0.001);
+const drag = 0.99;
+
+const { add, lerp, scale } = Vec2;
+
+type Behavior = (p: Particle, t: number) => Vec2;
+type BehaviorCreator = (...args: any[]) => Behavior;
+
+const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
+  return (p: Particle, t: number) => add(p.velocity, scale(g, t * t));
+};
+
+const createDragBehavior: BehaviorCreator = (d: number) => {
+  return (p: Particle, t: number) => lerp(p.velocity, p.currentPosition, d * t);
+};
+
+const gravityBehavior: Behavior = createGravityBehavior(gravity);
+const dragBehavior: Behavior = createDragBehavior(drag);
+
+const particle = new Particle(new Vec2(1, centerY), new Vec2(-1, centerY));
+particle.behaviors.push(gravityBehavior);
+particle.behaviors.push(dragBehavior);
 
 /**
  * update: updates the simulation
  * @param t {number} - the number of miliseconds to simulate
  */
 function update(t: number): void {
-  p.update(t);
+  particle.update(t);
 }
 
 /**
@@ -53,7 +75,7 @@ function update(t: number): void {
 function draw(i: number): void {
   bufferContext.clearRect(0, 0, stageWidth, stageHeight);
 
-  const { x, y } = p.getInterpolatedPosition(i);
+  const { x, y } = particle.getInterpolatedPosition(i);
 
   bufferContext.beginPath();
   bufferContext.arc(x, y, 3, 0, ππ);
@@ -130,4 +152,4 @@ function toggle(): void {
 }
 
 playStopButton.addEventListener('click', toggle);
-goto(0);
+goto(1);

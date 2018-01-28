@@ -30,12 +30,39 @@ describe('Particle', () => {
     expect(p.currentPosition.x).toBe(0);
     expect(p.currentPosition.y).toBe(0);
 
-    p.update();
+    p.update(1);
     expect(p.currentPosition.x).toBe(1);
     expect(p.currentPosition.y).toBeCloseTo(0);
 
-    p.update();
+    p.update(1);
     expect(p.currentPosition.x).toBe(2);
     expect(p.currentPosition.y).toBeCloseTo(0);
+  });
+
+  it('updates with behaviors applied to it', () => {
+    type Behavior = (p: Particle, t: number) => Vec2;
+    type BehaviorCreator = (...args: any[]) => Behavior;
+
+    const createTestBehavior: BehaviorCreator = (d: number) => {
+      return (p: Particle, t: number) => Vec2.scale(p.velocity, d * t);
+    };
+
+    const testBehavior = jest.fn(createTestBehavior(0));
+    const particle = new Particle(Vec2.ZERO, Vec2.fromPolar(π, 1));
+    particle.behaviors.push(testBehavior);
+
+    expect(particle.currentPosition.x).toBe(2);
+    expect(particle.currentPosition.y).toBeCloseTo(0);
+    expect(testBehavior).not.toHaveBeenCalled();
+
+    particle.update(1);
+    expect(particle.currentPosition.x).toBe(2);
+    expect(particle.currentPosition.y).toBeCloseTo(0);
+    expect(testBehavior).toHaveBeenCalledTimes(1);
+
+    particle.update(1);
+    expect(particle.currentPosition.x).toBe(2);
+    expect(particle.currentPosition.y).toBeCloseTo(0);
+    expect(testBehavior).toHaveBeenCalledTimes(2);
   });
 });
