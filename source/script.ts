@@ -41,11 +41,11 @@ type Behavior = (p: Particle, t: number) => Vec2;
 type BehaviorCreator = (...args: any[]) => Behavior;
 
 const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
-  return (p: Particle, t: number) => add(p.velocity, scale(g, t * t));
+  return (p: Particle, t: number) => add(p.cvel, scale(g, t * t));
 };
 
 const createDragBehavior: BehaviorCreator = (d: number) => {
-  return (p: Particle, t: number) => lerp(p.velocity, p.cpos, d * t);
+  return (p: Particle, t: number) => lerp(p.cvel, p.cpos, d * t);
 };
 
 const gravityBehavior: Behavior = createGravityBehavior(gravity);
