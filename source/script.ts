@@ -17,8 +17,8 @@ const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
 const buffer = document.createElement('canvas') as HTMLCanvasElement;
 const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
 
-const stageWidth = canvas.clientWidth / 5;
-const stageHeight = canvas.clientHeight / 5;
+const stageWidth = canvas.clientWidth / 2;
+const stageHeight = canvas.clientHeight / 2;
 const centerX = stageWidth / 2;
 const centerY = stageHeight / 2;
 
@@ -59,7 +59,7 @@ function init() {
 
   for (let i = 0; i < numParticles; ++i) {
     const cpos = new Vec2(particleX, particleY);
-    const ppos = add(cpos, fromPolar(random() * ππ, random() * 5));
+    const ppos = add(cpos, fromPolar(random() * ππ, random() * 4));
 
     const particle = new Particle(cpos, ppos);
     particle.behaviors.push(gravityBehavior);
@@ -100,14 +100,23 @@ function draw(i: number): void {
 
   const start = performance.now();
   particles.some(particle => {
+    const { cvel: { θ, ρ } } = particle;
     const { x, y } = particle.ipos(i);
 
-    bufferContext.beginPath();
-    bufferContext.arc(x, y, 3, 0, ππ);
-    bufferContext.closePath();
+    bufferContext.save();
 
-    bufferContext.strokeStyle = `hsl(${particle.cvel.θ * 180 / π},100%,50%)`;
-    bufferContext.stroke();
+    bufferContext.beginPath();
+    bufferContext.fillStyle = `hsl(${θ * 180 / π},100%,50%)`;
+
+    bufferContext.translate(x, y);
+    bufferContext.rotate(θ);
+
+    const l = ρ * 2;
+    const hl = l / 2;
+    bufferContext.rect(-hl, -0.5, l, 1);
+    bufferContext.fill();
+
+    bufferContext.restore();
 
     return performance.now() - start > simulationStep / 2;
   });

@@ -10,6 +10,7 @@ body {
 }
 
 main {
+  background: #222;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,7 +18,7 @@ main {
 }
 
 canvas {
-  background: white;
+  background: black;
   width: 800px;
   height: 450px;
   image-rendering: pixelated;
