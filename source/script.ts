@@ -50,11 +50,14 @@ const createDragBehavior: BehaviorCreator = (d: number) => {
 const gravityBehavior: Behavior = createGravityBehavior(gravity);
 const dragBehavior: Behavior = createDragBehavior(drag);
 
+const numParticles = 500;
 let particles: Particle[] = [];
+
 function init() {
   const particleX = stageWidth * 0.2 + random() * stageWidth * 0.6;
   const particleY = stageHeight * 0.2 + random() * stageHeight * 0.6;
-  for (let i = 0; i < 500; ++i) {
+
+  for (let i = 0; i < numParticles; ++i) {
     const cpos = new Vec2(particleX, particleY);
     const ppos = add(cpos, fromPolar(random() * ππ, random() * 5));
 
@@ -95,7 +98,8 @@ function draw(i: number): void {
   bufferContext.clearRect(0, 0, stageWidth, stageHeight);
   canvasContext.clearRect(0, 0, stageWidth, stageHeight);
 
-  particles.forEach(particle => {
+  const start = performance.now();
+  particles.some(particle => {
     const { x, y } = particle.ipos(i);
 
     bufferContext.beginPath();
@@ -104,6 +108,8 @@ function draw(i: number): void {
 
     bufferContext.strokeStyle = `hsl(${particle.cvel.θ * 180 / π},100%,50%)`;
     bufferContext.stroke();
+
+    return performance.now() - start > simulationStep / 2;
   });
 
   canvasContext.drawImage(buffer, 0, 0);
