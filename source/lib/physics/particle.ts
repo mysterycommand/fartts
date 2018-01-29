@@ -1,4 +1,5 @@
 import Vec2 from '../geom/vec2';
+const { add, sub, lerp, zero } = Vec2;
 
 export default class Particle {
   public behaviors: Array<(p: Particle, t: number) => Vec2> = [];
@@ -6,27 +7,27 @@ export default class Particle {
   public constructor(public cpos = new Vec2(), public ppos = cpos) {}
 
   public get cvel(): Vec2 {
-    return Vec2.sub(this.cpos, this.ppos);
+    return sub(this.cpos, this.ppos);
   }
 
   public ipos(i: number): Vec2 {
-    return Vec2.lerp(this.cpos, this.ppos, i);
+    return lerp(this.cpos, this.ppos, i);
   }
 
   public update(t: number): void {
-    const { cpos, ppos, behaviors } = this;
-
-    let { cvel } = this;
-    behaviors.forEach(b => {
-      cvel = b(this, 1);
-    });
+    const { nvel, cpos, ppos } = this;
 
     ppos.x = cpos.x;
     ppos.y = cpos.y;
 
-    cpos.x += cvel.x;
-    cpos.y += cvel.y;
+    cpos.x += nvel.x;
+    cpos.y += nvel.y;
 
     // constraints: distance, bounds, etc...
+  }
+
+  private get nvel(): Vec2 {
+    const { behaviors, cvel } = this;
+    return behaviors.reduce((v, b) => add(v, b(this, 1)), cvel);
   }
 }

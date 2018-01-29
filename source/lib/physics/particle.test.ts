@@ -17,7 +17,7 @@ describe('Particle', () => {
   });
 
   it("defaults to having a previous position equal to it's provided current position", () => {
-    const { cpos, ppos, cvel } = new Particle(Vec2.UNIT);
+    const { cpos, ppos, cvel } = new Particle(Vec2.unit);
 
     expect(cpos.x).toBe(1);
     expect(cpos.y).toBe(1);
@@ -30,7 +30,7 @@ describe('Particle', () => {
   });
 
   it("can interpolate it's position relative to it's previous one", () => {
-    const p = new Particle(Vec2.ZERO, Vec2.UNIT);
+    const p = new Particle(Vec2.zero, Vec2.unit);
     const v = p.ipos(0.5);
 
     expect(v.x).toBe(0.5);
@@ -38,7 +38,7 @@ describe('Particle', () => {
   });
 
   it("updates based on it's previous position", () => {
-    const p = new Particle(Vec2.ZERO, Vec2.fromPolar(π, 1));
+    const p = new Particle(Vec2.zero, Vec2.fromPolar(π, 1));
 
     expect(p.cpos.x).toBe(0);
     expect(p.cpos.y).toBe(0);
@@ -61,7 +61,7 @@ describe('Particle', () => {
     };
 
     const testBehavior = jest.fn(createTestBehavior(0));
-    const particle = new Particle(Vec2.ZERO, Vec2.fromPolar(π, 1));
+    const particle = new Particle(Vec2.zero, Vec2.fromPolar(π, 1));
     particle.behaviors.push(testBehavior);
 
     expect(particle.cpos.x).toBe(2);

@@ -2,18 +2,18 @@ import { atan2, hypot, π } from '../math';
 import Vec2 from './vec2';
 
 describe('Vec2', () => {
-  it('defaults to the origin (ZERO) vector', () => {
+  it('defaults to the origin (zero) vector', () => {
     const v = new Vec2();
     expect(v.x).toBe(0);
     expect(v.y).toBe(0);
   });
 
-  it('has static ZERO and UNIT vectors', () => {
-    const zero = Vec2.ZERO;
+  it('has static zero and unit vectors', () => {
+    const zero = Vec2.zero;
     expect(zero.x).toBe(0);
     expect(zero.y).toBe(0);
 
-    const unit = Vec2.UNIT;
+    const unit = Vec2.unit;
     expect(unit.x).toBe(1);
     expect(unit.y).toBe(1);
   });
@@ -22,7 +22,7 @@ describe('Vec2', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
     const c = Vec2.add(a, b);
-    const d = Vec2.add(a, Vec2.ZERO);
+    const d = Vec2.add(a, Vec2.zero);
 
     expect(a.x).toBe(1);
     expect(a.y).toBe(2);
@@ -42,7 +42,7 @@ describe('Vec2', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
     const c = Vec2.sub(a, b);
-    const d = Vec2.sub(a, Vec2.ZERO);
+    const d = Vec2.sub(a, Vec2.zero);
 
     expect(a.x).toBe(1);
     expect(a.y).toBe(2);
@@ -62,7 +62,7 @@ describe('Vec2', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
     const c = Vec2.lerp(a, b, 0.5);
-    const d = Vec2.lerp(a, Vec2.ZERO, 0.25);
+    const d = Vec2.lerp(a, Vec2.zero, 0.25);
 
     expect(c.x).toBe(2);
     expect(c.y).toBe(3);

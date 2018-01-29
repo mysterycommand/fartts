@@ -1,8 +1,12 @@
 import { atan2, cos, hypot, sin } from '../math';
 
 export default class Vec2 {
-  public static ZERO = new Vec2();
-  public static UNIT = new Vec2(1, 1);
+  public static get zero(): Vec2 {
+    return new Vec2();
+  }
+  public static get unit(): Vec2 {
+    return new Vec2(1, 1);
+  }
 
   public static add(a: Vec2, b: Vec2): Vec2 {
     return new Vec2(a.x + b.x, a.y + b.y);

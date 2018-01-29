@@ -1,9 +1,10 @@
 import './style.scss';
 
 import Vec2 from './lib/geom/vec2';
-import { ππ } from './lib/math';
+import { random, π, ππ } from './lib/math';
 import Particle from './lib/physics/particle';
 
+const { add, fromPolar, lerp, scale, zero } = Vec2;
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
 const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
@@ -32,35 +33,43 @@ const simulationStep = 1000 / 60;
 let simulationExcess = 0;
 
 // TODO: factor this out into a gravity (or maybe just general acceleration) behavior
-const gravity = new Vec2(0, 0.001);
-const drag = 0.99;
-
-const { add, lerp, scale } = Vec2;
+const gravity = new Vec2(0, 0.1);
+const drag = 0.01;
 
 type Behavior = (p: Particle, t: number) => Vec2;
 type BehaviorCreator = (...args: any[]) => Behavior;
 
 const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
-  return (p: Particle, t: number) => add(p.cvel, scale(g, t * t));
+  return (p: Particle, t: number) => scale(g, t * t);
 };
 
 const createDragBehavior: BehaviorCreator = (d: number) => {
-  return (p: Particle, t: number) => lerp(p.cvel, p.cpos, d * t);
+  return (p: Particle, t: number) => lerp(p.cvel, zero, d * t);
 };
 
 const gravityBehavior: Behavior = createGravityBehavior(gravity);
 const dragBehavior: Behavior = createDragBehavior(drag);
 
-const particle = new Particle(new Vec2(1, centerY), new Vec2(-1, centerY));
-particle.behaviors.push(gravityBehavior);
-particle.behaviors.push(dragBehavior);
+const particles: Particle[] = [];
+for (let i = 0; i < 500; ++i) {
+  const cpos = new Vec2(centerX, centerY);
+  const ppos = add(cpos, fromPolar(random() * ππ, random() * 5));
+
+  const particle = new Particle(cpos, ppos);
+  particle.behaviors.push(gravityBehavior);
+  particle.behaviors.push(dragBehavior);
+  particles.push(particle);
+}
 
 /**
  * update: updates the simulation
  * @param t {number} - the number of miliseconds to simulate
  */
 function update(t: number): void {
-  particle.update(t);
+  particles.forEach(particle => {
+    // console.log(particle.vel); // tslint:disable-line
+    particle.update(1);
+  });
 }
 
 /**
@@ -74,17 +83,19 @@ function update(t: number): void {
  */
 function draw(i: number): void {
   bufferContext.clearRect(0, 0, stageWidth, stageHeight);
-
-  const { x, y } = particle.ipos(i);
-
-  bufferContext.beginPath();
-  bufferContext.arc(x, y, 3, 0, ππ);
-  bufferContext.closePath();
-
-  bufferContext.strokeStyle = 'darkred';
-  bufferContext.stroke();
-
   canvasContext.clearRect(0, 0, stageWidth, stageHeight);
+
+  particles.forEach(particle => {
+    const { x, y } = particle.ipos(i);
+
+    bufferContext.beginPath();
+    bufferContext.arc(x, y, 3, 0, ππ);
+    bufferContext.closePath();
+
+    bufferContext.strokeStyle = `hsl(${particle.cvel.θ * 180 / π},100%,50%)`;
+    bufferContext.stroke();
+  });
+
   canvasContext.drawImage(buffer, 0, 0);
 }
 
@@ -152,4 +163,4 @@ function toggle(): void {
 }
 
 playStopButton.addEventListener('click', toggle);
-goto(1);
+goto(0);
