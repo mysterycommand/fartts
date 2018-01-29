@@ -64,12 +64,12 @@ describe('Particle', () => {
     const particle = new Particle(Vec2.zero, Vec2.fromPolar(π, 1));
     particle.behaviors.push(testBehavior);
 
-    expect(particle.cpos.x).toBe(2);
+    expect(particle.cpos.x).toBe(0);
     expect(particle.cpos.y).toBeCloseTo(0);
     expect(testBehavior).not.toHaveBeenCalled();
 
     particle.update(1);
-    expect(particle.cpos.x).toBe(2);
+    expect(particle.cpos.x).toBe(1);
     expect(particle.cpos.y).toBeCloseTo(0);
     expect(testBehavior).toHaveBeenCalledTimes(1);
 
