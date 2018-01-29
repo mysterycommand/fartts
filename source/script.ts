@@ -50,15 +50,19 @@ const createDragBehavior: BehaviorCreator = (d: number) => {
 const gravityBehavior: Behavior = createGravityBehavior(gravity);
 const dragBehavior: Behavior = createDragBehavior(drag);
 
-const particles: Particle[] = [];
-for (let i = 0; i < 500; ++i) {
-  const cpos = new Vec2(centerX, centerY);
-  const ppos = add(cpos, fromPolar(random() * ππ, random() * 5));
+let particles: Particle[] = [];
+function init() {
+  const particleX = stageWidth * 0.2 + random() * stageWidth * 0.6;
+  const particleY = stageHeight * 0.2 + random() * stageHeight * 0.6;
+  for (let i = 0; i < 500; ++i) {
+    const cpos = new Vec2(particleX, particleY);
+    const ppos = add(cpos, fromPolar(random() * ππ, random() * 5));
 
-  const particle = new Particle(cpos, ppos);
-  particle.behaviors.push(gravityBehavior);
-  particle.behaviors.push(dragBehavior);
-  particles.push(particle);
+    const particle = new Particle(cpos, ppos);
+    particle.behaviors.push(gravityBehavior);
+    particle.behaviors.push(dragBehavior);
+    particles.push(particle);
+  }
 }
 
 /**
@@ -66,10 +70,16 @@ for (let i = 0; i < 500; ++i) {
  * @param t {number} - the number of miliseconds to simulate
  */
 function update(t: number): void {
+  if (particles.length === 0) {
+    init();
+  }
+
   particles.forEach(particle => {
     // console.log(particle.vel); // tslint:disable-line
     particle.update(1);
   });
+
+  particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
 }
 
 /**
