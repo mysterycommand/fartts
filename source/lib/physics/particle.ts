@@ -3,29 +3,29 @@ import Vec2 from '../geom/vec-2';
 export default class Particle {
   public behaviors: Array<(p: Particle, t: number) => Vec2> = [];
 
-  public constructor(public currentPosition = new Vec2(), public previousPosition = new Vec2()) {}
+  public constructor(public cpos = new Vec2(), public ppos = cpos) {}
 
-  public get velocity(): Vec2 {
-    return Vec2.sub(this.currentPosition, this.previousPosition);
+  public get cvel(): Vec2 {
+    return Vec2.sub(this.cpos, this.ppos);
   }
 
-  public getInterpolatedPosition(i: number): Vec2 {
-    return Vec2.lerp(this.currentPosition, this.previousPosition, i);
+  public ipos(i: number): Vec2 {
+    return Vec2.lerp(this.cpos, this.ppos, i);
   }
 
   public update(t: number): void {
-    const { currentPosition, previousPosition, behaviors } = this;
+    const { cpos, ppos, behaviors } = this;
 
-    let { velocity } = this;
+    let { cvel } = this;
     behaviors.forEach(b => {
-      velocity = b(this, 1);
+      cvel = b(this, 1);
     });
 
-    previousPosition.x = currentPosition.x;
-    previousPosition.y = currentPosition.y;
+    ppos.x = cpos.x;
+    ppos.y = cpos.y;
 
-    currentPosition.x += velocity.x;
-    currentPosition.y += velocity.y;
+    cpos.x += cvel.x;
+    cpos.y += cvel.y;
 
     // constraints: distance, bounds, etc...
   }

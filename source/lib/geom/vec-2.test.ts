@@ -105,11 +105,11 @@ describe('Vec2', () => {
 
   it('has an angle property', () => {
     const v = new Vec2(3, 3);
-    expect(v.angle).toBe(π / 4);
+    expect(v.θ).toBe(π / 4);
   });
 
   it('has a length property', () => {
     const v = new Vec2(3, 4);
-    expect(v.length).toBe(5);
+    expect(v.ρ).toBe(5);
   });
 });

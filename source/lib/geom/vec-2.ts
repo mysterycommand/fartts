@@ -17,31 +17,23 @@ export default class Vec2 {
   }
 
   public static lerp(a: Vec2, b: Vec2, i: number): Vec2 {
-    const { x: ax, y: ay } = a;
-    const { x: bx, y: by } = b;
-
-    const x = bx + (ax - bx) * i;
-    const y = by + (ay - by) * i;
+    const x = b.x + (a.x - b.x) * i;
+    const y = b.y + (a.y - b.y) * i;
 
     return new Vec2(x, y);
   }
 
-  public static fromPolar(angle = 0, radius = 0): Vec2 {
-    const x = cos(angle) * radius;
-    const y = sin(angle) * radius;
-
-    return new Vec2(x, y);
+  public static fromPolar(θ = 0, ρ = 0): Vec2 {
+    return new Vec2(cos(θ) * ρ, sin(θ) * ρ);
   }
 
   public constructor(public x = 0, public y = 0) {}
 
-  // ρ
-  public get length() {
+  public get ρ() {
     return hypot(this.x, this.y);
   }
 
-  // θ
-  public get angle() {
+  public get θ() {
     return atan2(this.y, this.x);
   }
 }

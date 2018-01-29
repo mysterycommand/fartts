@@ -45,7 +45,7 @@ const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
 };
 
 const createDragBehavior: BehaviorCreator = (d: number) => {
-  return (p: Particle, t: number) => lerp(p.velocity, p.currentPosition, d * t);
+  return (p: Particle, t: number) => lerp(p.velocity, p.cpos, d * t);
 };
 
 const gravityBehavior: Behavior = createGravityBehavior(gravity);
@@ -75,7 +75,7 @@ function update(t: number): void {
 function draw(i: number): void {
   bufferContext.clearRect(0, 0, stageWidth, stageHeight);
 
-  const { x, y } = particle.getInterpolatedPosition(i);
+  const { x, y } = particle.ipos(i);
 
   bufferContext.beginPath();
   bufferContext.arc(x, y, 3, 0, ππ);
