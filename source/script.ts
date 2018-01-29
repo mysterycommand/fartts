@@ -1,6 +1,6 @@
 import './style.scss';
 
-import Vec2 from './lib/geom/vec-2';
+import Vec2 from './lib/geom/vec2';
 import { ππ } from './lib/math';
 import Particle from './lib/physics/particle';
 

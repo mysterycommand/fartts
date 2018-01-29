@@ -1,4 +1,4 @@
-import Vec2 from '../geom/vec-2';
+import Vec2 from '../geom/vec2';
 import { π } from '../math';
 import Particle from './particle';
 

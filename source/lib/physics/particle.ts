@@ -1,4 +1,4 @@
-import Vec2 from '../geom/vec-2';
+import Vec2 from '../geom/vec2';
 
 export default class Particle {
   public behaviors: Array<(p: Particle, t: number) => Vec2> = [];

@@ -1,5 +1,5 @@
 import { atan2, hypot, π } from '../math';
-import Vec2 from './vec-2';
+import Vec2 from './vec2';
 
 describe('Vec2', () => {
   it('defaults to the origin (ZERO) vector', () => {
