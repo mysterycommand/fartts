@@ -12,10 +12,13 @@
     "yarn": "^1.3.2"
   },
   "scripts": {
+    "build": "parcel build source/index.html --public-url ./",
+    "start": "parcel source/index.html",
     "lint": "yarn lint:ts ; yarn lint:scss",
     "lint:ts": "tslint 'source/**/*.ts'",
     "lint:scss": "sass-lint -v 'source/**/*.scss'",
-    "test": "jest && cat ./coverage/lcov.info | coveralls"
+    "test": "jest && cat ./coverage/lcov.info | yarn report",
+    "report": "if [ \"${CI}\" ]; then (coveralls) fi"
   },
   "dependencies": {},
   "devDependencies": {
@@ -42,7 +45,7 @@
   },
   "jest": {
     "collectCoverage": true,
-    "collectCoverageFrom": ["source/**/*.ts", "!**/node_modules/**"],
+    "collectCoverageFrom": ["source/**/*.ts", "!source/script.ts", "!**/node_modules/**"],
     "coverageThreshold": {
       "global": {
         "branches": 100,
