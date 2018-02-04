@@ -13,3 +13,13 @@ after_script:
 env:
   global:
     secure: JsKJJu1GFCyNFuU3fsQgn+0J6o6tBT6cC1xlD/qrd1adL8UsFs2sWl0pKzKbbEat28S5nZkyqGyiK1b5s6KUVohwY78pSO67t/4HJxIOqoD8Ut9vKlW+12bdBC7rMF6LrLMRABWfiu9t5CryGl8ydR51RcTBW7pzHe3Mqxmbzq5ZI1oa5pAPESJz7CNpifzMhKmvUfu7uRIwAeD1TMq7SYF6cz7t05I2CtnwL5EqWRluwwJaZOGF2dNNm6+mk6G/3lyUvKz513is4yZb0psbZ6fKbxbnahWiZnm6mcChtHWCRt5JAJvShePOudHFovaKsh+YGYZb+IPvj/62zKxWsLdngr+zRIiJ2AB7EekU4K6OqnzWqwKSS/znaN2YADoFQAmreJh3f/LREADH8tDi3S5pX9oyCk5YbF/5dg1YoPVv5gJBm+/MUXaTeLKLWcoNuHhTRhmtmY8S7acLz3PPVKTlKhcoTkhEzNpZS/gVkoId62xJ4ehVDA3bJ4dSJ9M0bSJqKioVXgl/b4DgYrOgvZQ1r7/D8f4Zi4yQTEM0ZMCQ2dwLWglUqDiIRa1kKPfCWjMq7XfsMCN3nnMPfj+bvbFqBBUXzoIpJi1jRYA33NTmOc6jkO3Np3byokOci4bk2BOjQsRo7LCE0PKvHcs+IC8DHvSRaerH1tZLLwvxtfs=
+before_deploy:
+  - yarn build
+deploy:
+  provider: pages
+  on:
+    branch: master
+  allow_empty_commit: true
+  keep_history: true
+  skip_cleanup: true
+  local_dir: dist/

@@ -20,9 +20,12 @@
     "test": "jest && cat ./coverage/lcov.info | yarn report",
     "report": "if [ \"${CI}\" ]; then (coveralls) fi"
   },
-  "dependencies": {},
+  "dependencies": {
+    "seedrandom": "^2.4.3"
+  },
   "devDependencies": {
     "@types/jest": "^22.1.1",
+    "@types/seedrandom": "^2.4.27",
     "commitizen": "^2.9.6",
     "coveralls": "^3.0.0",
     "cz-conventional-changelog": "^2.1.0",
