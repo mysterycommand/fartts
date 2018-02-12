@@ -1,7 +1,7 @@
 import './style.scss';
 
 import Vec2 from './lib/geom/vec2';
-import { random, π, ππ } from './lib/math';
+import { min, random, π, ππ } from './lib/math';
 import Particle from './lib/physics/particle';
 
 const { add, fromPolar, lerp, scale, zero } = Vec2;
@@ -29,37 +29,35 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 /**
  * SIMULATION
  */
-const simulationStep = 1000 / 60;
-let simulationExcess = 0;
 
 // TODO: factor this out into a gravity (or maybe just general acceleration) behavior
-const gravity = new Vec2(0, 0.1);
+const gravity = new Vec2(0, 0.15);
 const drag = 0.01;
 
 type Behavior = (p: Particle, t: number) => Vec2;
 type BehaviorCreator = (...args: any[]) => Behavior;
 
 const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
-  return (p: Particle, t: number) => scale(g, t * t);
+  return (p: Particle, t: number) => g;
 };
 
 const createDragBehavior: BehaviorCreator = (d: number) => {
-  return (p: Particle, t: number) => lerp(p.cvel, zero, d * t);
+  return (p: Particle, t: number) => scale(lerp(p.cvel, zero, d), -1);
 };
 
 const gravityBehavior: Behavior = createGravityBehavior(gravity);
 const dragBehavior: Behavior = createDragBehavior(drag);
 
-const numParticles = 500;
+const numParticles = 10;
 let particles: Particle[] = [];
 
 function init() {
-  const particleX = stageWidth * 0.2 + random() * stageWidth * 0.6;
-  const particleY = stageHeight * 0.2 + random() * stageHeight * 0.6;
+  const initX = stageWidth * 0.2 + random() * stageWidth * 0.6;
+  const initY = stageHeight * 0.2 + random() * stageHeight * 0.6;
 
   for (let i = 0; i < numParticles; ++i) {
-    const cpos = new Vec2(particleX, particleY);
-    const ppos = add(cpos, fromPolar(random() * ππ, random() * 4));
+    const cpos = new Vec2(initX, initY);
+    const ppos = add(cpos, fromPolar(random() * ππ, random() * 10));
 
     const particle = new Particle(cpos, ppos);
     particle.behaviors.push(gravityBehavior);
@@ -78,8 +76,8 @@ function update(t: number): void {
   }
 
   particles.forEach(particle => {
-    // console.log(particle.vel); // tslint:disable-line
-    particle.update(1);
+    // console.log(t); // tslint:disable-line
+    particle.update(t);
   });
 
   particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
@@ -118,7 +116,7 @@ function draw(i: number): void {
 
     bufferContext.restore();
 
-    return performance.now() - start > simulationStep / 2;
+    return performance.now() - start > step / 2;
   });
 
   canvasContext.drawImage(buffer, 0, 0);
@@ -127,6 +125,9 @@ function draw(i: number): void {
 /**
  * GAME-LOOP
  */
+const step = 1000 / 60;
+let excess = 0;
+
 let frameId = -1;
 
 // resets everytime you click 'play'
@@ -144,14 +145,15 @@ function tick(time: number): void {
   deltaTime = normalTime - previousTime;
 
   previousTime = normalTime;
-  simulationExcess += deltaTime;
+  excess += deltaTime;
 
-  while (simulationExcess >= simulationStep) {
-    update(simulationStep);
-    simulationExcess -= simulationStep;
+  excess = min(excess, 1000);
+  while (excess >= step) {
+    update(step);
+    excess -= step;
   }
 
-  draw(simulationExcess / simulationStep);
+  draw(excess / step);
 }
 
 function play(): void {
@@ -161,7 +163,7 @@ function play(): void {
   frameId = rAF((time: number) => {
     firstTime = time;
     previousTime = 0;
-    simulationExcess = 0;
+    excess = 0;
 
     frameId = rAF(tick);
   });
@@ -177,7 +179,7 @@ function stop(): void {
 
 function goto(f: number): void {
   for (let i = 0; i < f; ++i) {
-    update(simulationStep);
+    update(step);
   }
 
   draw(1);

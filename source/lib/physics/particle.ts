@@ -15,7 +15,8 @@ export default class Particle {
   }
 
   public update(t: number): void {
-    const { nvel, cpos, ppos } = this;
+    const { cpos, ppos } = this;
+    const nvel = this.nvel(t);
 
     ppos.x = cpos.x;
     ppos.y = cpos.y;
@@ -26,8 +27,8 @@ export default class Particle {
     // constraints: distance, bounds, etc...
   }
 
-  private get nvel(): Vec2 {
+  private nvel(t: number): Vec2 {
     const { behaviors, cvel } = this;
-    return behaviors.reduce((v, b) => add(v, b(this, 1)), cvel);
+    return behaviors.reduce((v, b) => add(v, b(this, t)), cvel);
   }
 }
