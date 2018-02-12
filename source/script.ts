@@ -7,9 +7,9 @@ import Particle from './lib/physics/particle';
 const { add, fromPolar, lerp, scale, zero } = Vec2;
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
-// const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
-// const playLabel = '▶';
-// const stopLabel = '■';
+const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
+const playLabel = '▶';
+const stopLabel = '■';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -31,22 +31,9 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
  */
 
 // TODO: factor this out into a gravity (or maybe just general acceleration) behavior
-const gravity = new Vec2(0, 0.15);
-const drag = 0.01;
-
-type Behavior = (p: Particle, t: number) => Vec2;
-type BehaviorCreator = (...args: any[]) => Behavior;
-
-const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
-  return (p: Particle, t: number) => g;
-};
-
-const createDragBehavior: BehaviorCreator = (d: number) => {
-  return (p: Particle, t: number) => scale(lerp(p.cvel, zero, d), -1);
-};
-
-const gravityBehavior: Behavior = createGravityBehavior(gravity);
-const dragBehavior: Behavior = createDragBehavior(drag);
+const g = new Vec2(0, 0.15);
+const gravity = () => g;
+const drag = (p: Particle) => scale(lerp(p.cvel, zero, 0.01), -1);
 
 const numParticles = 10;
 let particles: Particle[] = [];
@@ -60,8 +47,8 @@ function init() {
     const ppos = add(cpos, fromPolar(random() * ππ, random() * 10));
 
     const particle = new Particle(cpos, ppos);
-    particle.behaviors.push(gravityBehavior);
-    particle.behaviors.push(dragBehavior);
+    particle.behaviors.push(gravity);
+    particle.behaviors.push(drag);
     particles.push(particle);
   }
 }
@@ -157,8 +144,8 @@ function tick(time: number): void {
 }
 
 function play(): void {
-  // playStopButton.innerText = stopLabel;
-  // playStopButton.setAttribute('aria-label', 'stop');
+  playStopButton.innerText = stopLabel;
+  playStopButton.setAttribute('aria-label', 'stop');
 
   frameId = rAF((time: number) => {
     firstTime = time;
@@ -170,8 +157,8 @@ function play(): void {
 }
 
 function stop(): void {
-  // playStopButton.innerText = playLabel;
-  // playStopButton.setAttribute('aria-label', 'play');
+  playStopButton.innerText = playLabel;
+  playStopButton.setAttribute('aria-label', 'play');
 
   cAF(frameId);
   frameId = -1;
@@ -189,5 +176,5 @@ function toggle(): void {
   frameId === -1 ? play() : stop();
 }
 
-// playStopButton.addEventListener('click', toggle);
-play();
+playStopButton.addEventListener('click', toggle);
+goto(3);
