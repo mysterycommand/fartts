@@ -6,9 +6,9 @@ import Particle from './lib/physics/particle';
 
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
-const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
-const playLabel = '▶';
-const stopLabel = '■';
+// const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
+// const playLabel = '▶';
+// const stopLabel = '■';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -16,8 +16,9 @@ const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
 const buffer = document.createElement('canvas') as HTMLCanvasElement;
 const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
 
-const stageWidth = canvas.clientWidth;
-const stageHeight = canvas.clientHeight;
+const stageScale = 2;
+const stageWidth = canvas.clientWidth / stageScale;
+const stageHeight = canvas.clientHeight / stageScale;
 const centerX = stageWidth / 2;
 const centerY = stageHeight / 2;
 
@@ -37,10 +38,10 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 // const d = 0.01;
 // const drag = (p: Particle) => scale(lerp(p.cvel, Vec2.zero, d), -1);
 
-const speed = 3;
-const force = 0.05;
+const speed = 3 / stageScale;
+const force = 0.025 / stageScale;
 
-function getSeparate(ps: Particle[], dist: number = 25): (p: Particle) => Vec2 {
+function getSeparate(ps: Particle[], dist: number = 40 / stageScale): (p: Particle) => Vec2 {
   return (p: Particle): Vec2 => {
     let j = 0;
 
@@ -67,7 +68,7 @@ function getSeparate(ps: Particle[], dist: number = 25): (p: Particle) => Vec2 {
   };
 }
 
-function getAlign(ps: Particle[], dist: number = 50): (p: Particle) => Vec2 {
+function getAlign(ps: Particle[], dist: number = 100 / stageScale): (p: Particle) => Vec2 {
   return (p: Particle): Vec2 => {
     let j = 0;
 
@@ -91,7 +92,7 @@ function getAlign(ps: Particle[], dist: number = 50): (p: Particle) => Vec2 {
   };
 }
 
-function getCohere(ps: Particle[], dist: number = 50): (p: Particle) => Vec2 {
+function getCohere(ps: Particle[], dist: number = 100 / stageScale): (p: Particle) => Vec2 {
   return (p: Particle): Vec2 => {
     let j = 0;
 
@@ -221,9 +222,10 @@ function draw(i: number): void {
     bufferContext.translate(x, y);
     bufferContext.rotate(θ);
 
-    const l = ρ * 5;
+    const s = 20 / stageScale;
+    const l = ρ * s * 2;
     const hl = l / 2;
-    const w = 5;
+    const w = s / 2;
     const hw = w / 2;
     bufferContext.rect(-hl, -hw, l, w);
     bufferContext.fill();
@@ -271,8 +273,8 @@ function tick(time: number): void {
 }
 
 function play(): void {
-  playStopButton.innerText = stopLabel;
-  playStopButton.setAttribute('aria-label', 'stop');
+  // playStopButton.innerText = stopLabel;
+  // playStopButton.setAttribute('aria-label', 'stop');
 
   frameId = rAF((time: number) => {
     firstTime = time;
@@ -284,8 +286,8 @@ function play(): void {
 }
 
 function stop(): void {
-  playStopButton.innerText = playLabel;
-  playStopButton.setAttribute('aria-label', 'play');
+  // playStopButton.innerText = playLabel;
+  // playStopButton.setAttribute('aria-label', 'play');
 
   cAF(frameId);
   frameId = -1;
@@ -303,6 +305,6 @@ function toggle(): void {
   frameId === -1 ? play() : stop();
 }
 
-playStopButton.addEventListener('click', toggle);
+// playStopButton.addEventListener('click', toggle);
 // goto(3);
 play();
