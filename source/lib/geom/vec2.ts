@@ -1,4 +1,4 @@
-import { atan2, cos, hypot, sin } from '../math';
+import { atan2, cos, hypot, sin, π } from '../math';
 
 export default class Vec2 {
   public static get one() {
@@ -38,7 +38,8 @@ export default class Vec2 {
   }
 
   public static limit(v: Vec2, l: number): Vec2 {
-    return v.ρ > l ? Vec2.fromPolar(v.θ, l) : Vec2.clone(v);
+    // console.log(v.θ * 180 / π + 180); // tslint:disable-line
+    return v.ρ > l ? Vec2.scale(Vec2.normalize(v), l) : Vec2.clone(v);
   }
 
   public static fromPolar(θ = 0, ρ = 0): Vec2 {

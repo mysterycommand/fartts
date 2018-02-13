@@ -1,4 +1,4 @@
-import Vec2, { add, clone, lerp, sub } from '../geom/vec2';
+import Vec2, { add, clone, lerp, limit, sub } from '../geom/vec2';
 
 export default class Particle {
   public behaviors: Array<(p: Particle, t: number) => Vec2> = [];
@@ -14,14 +14,11 @@ export default class Particle {
   }
 
   public update(t: number): void {
-    const { cpos, ppos } = this;
-    const nvel = this.nvel(t);
+    const { cpos } = this;
+    const nvel = limit(this.nvel(t), 3);
 
-    ppos.x = cpos.x;
-    ppos.y = cpos.y;
-
-    cpos.x += nvel.x;
-    cpos.y += nvel.y;
+    this.ppos = clone(cpos);
+    this.cpos = add(cpos, nvel);
 
     // constraints: distance, bounds, etc...
   }
