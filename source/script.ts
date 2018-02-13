@@ -1,6 +1,6 @@
 import './style.scss';
 
-import Vec2, { add, fromPolar, lerp, scale, sub } from './lib/geom/vec2';
+import Vec2, { add, fromPolar, lerp, limit, normalize, scale, sub } from './lib/geom/vec2';
 import { min, random, π, ππ } from './lib/math';
 import Particle from './lib/physics/particle';
 
@@ -16,8 +16,8 @@ const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
 const buffer = document.createElement('canvas') as HTMLCanvasElement;
 const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
 
-const stageWidth = canvas.clientWidth / 2;
-const stageHeight = canvas.clientHeight / 2;
+const stageWidth = canvas.clientWidth / 5;
+const stageHeight = canvas.clientHeight / 5;
 const centerX = stageWidth / 2;
 const centerY = stageHeight / 2;
 
@@ -37,49 +37,73 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 // const d = 0.01;
 // const drag = (p: Particle) => scale(lerp(p.cvel, Vec2.zero, d), -1);
 
-const sep = 25;
-const speed = 3;
-const force = 0.05;
-function separate(ps: Particle[], p: Particle) {
-  let j = 0;
+function getSeparate(ps: Particle[]): (p: Particle) => Vec2 {
+  const dist = 25;
+  const speed = 3;
+  const force = 0.05;
 
-  let w = ps.reduce((v, q) => {
-    const d = sub(p.cpos, q.cpos);
+  return (p: Particle): Vec2 => {
+    let j = 0;
 
-    if (d.ρ > 0 && d.ρ < sep) {
-      ++j;
-      return add(v, scale(scale(d, 1 / d.ρ), 1 / d.ρ));
+    let w = ps.reduce((v, q) => {
+      const d = sub(p.cpos, q.cpos);
+
+      if (d.ρ > 0 && d.ρ < dist) {
+        ++j;
+        return add(v, scale(scale(d, 1 / d.ρ), 1 / d.ρ));
+      }
+
+      return v;
+    }, Vec2.zero);
+
+    if (j > 0) {
+      w = scale(w, 1 / j);
     }
 
-    return v;
-  }, Vec2.zero);
+    if (w.ρ > 0) {
+      return limit(sub(scale(normalize(w), speed), p.cvel), force);
+    }
 
-  if (j > 0) {
-    w = scale(w, 1 / j);
-  }
+    return w;
+  };
+}
 
-  if (w.ρ > 0) {
-    return limit(sub(scale(normalize(w), speed), p.cvel), force);
-  }
+function getAlign(ps: Particle[]): (p: Particle) => Vec2 {
+  return (p: Particle): Vec2 => {
+    return new Vec2();
+  };
+}
 
-  return w;
+function getCohere(ps: Particle[]): (p: Particle) => Vec2 {
+  return (p: Particle): Vec2 => {
+    return new Vec2();
+  };
 }
 
 const numParticles = 10;
-const particles: Particle[] = [];
+let particles: Particle[] = [];
+
+const separate = getSeparate(particles);
+const align = getAlign(particles);
+const cohere = getCohere(particles);
 
 function init() {
-  const initX = stageWidth * 0.2 + random() * stageWidth * 0.6;
-  const initY = stageHeight * 0.2 + random() * stageHeight * 0.6;
+  // const initX = stageWidth * 0.2 + random() * stageWidth * 0.6;
+  // const initY = stageHeight * 0.2 + random() * stageHeight * 0.6;
 
   for (let i = 0; i < numParticles; ++i) {
-    const cpos = new Vec2(initX, initY);
-    const ppos = add(cpos, fromPolar(random() * ππ, random() * 10));
+    const cpos = new Vec2(centerX, centerY);
+    const ppos = add(cpos, fromPolar(i / numParticles * ππ, 1));
 
     const particle = new Particle(cpos, ppos);
+    particles.push(particle);
+
     // particle.behaviors.push(gravity);
     // particle.behaviors.push(drag);
-    particles.push(particle);
+
+    particle.behaviors.push(separate);
+    particle.behaviors.push(align);
+    particle.behaviors.push(cohere);
   }
 }
 
@@ -98,6 +122,13 @@ function update(t: number): void {
   });
 
   // particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
+  particles = particles.filter(({ cpos: { x, y } }) => {
+    const top = 0 < y;
+    const right = x < stageWidth;
+    const bottom = y < stageHeight;
+    const left = 0 < x;
+    return top && right && bottom && left;
+  });
 }
 
 /**
@@ -207,4 +238,5 @@ function toggle(): void {
 }
 
 playStopButton.addEventListener('click', toggle);
-goto(3);
+// goto(3);
+play();
