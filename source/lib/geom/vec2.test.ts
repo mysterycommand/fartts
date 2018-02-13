@@ -1,5 +1,5 @@
 import { atan2, hypot, π } from '../math';
-import Vec2, { add, clone, fromPolar, lerp, normalize, scale, sub } from './vec2';
+import Vec2, { add, clone, fromPolar, lerp, limit, normalize, scale, sub } from './vec2';
 
 describe('Vec2', () => {
   it('defaults to the origin (zero) vector', () => {
@@ -99,6 +99,20 @@ describe('Vec2', () => {
 
     expect(a.ρ).toBe(1);
     expect(b.ρ).toBe(0);
+  });
+
+  it('limits', () => {
+    const a = new Vec2(10, 8);
+    const b = limit(a, 5);
+    const c = scale(normalize(a), 5);
+    const d = limit(a, 50);
+
+    expect(b.x).toBeCloseTo(c.x);
+    expect(b.y).toBeCloseTo(c.y);
+
+    expect(a).not.toBe(d);
+    expect(a.x).toBe(d.x);
+    expect(a.y).toBe(d.y);
   });
 
   it('creates vectors from polar coordinates', () => {

@@ -37,25 +37,33 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 // const d = 0.01;
 // const drag = (p: Particle) => scale(lerp(p.cvel, Vec2.zero, d), -1);
 
-// const sep = 25;
-// function separate(ps: Particle[], p: Particle) {
-//   let j = 0;
+const sep = 25;
+const speed = 3;
+const force = 0.05;
+function separate(ps: Particle[], p: Particle) {
+  let j = 0;
 
-//   let w = ps.reduce((v, q) => {
-//     const d = sub(p.cpos, q.cpos);
+  let w = ps.reduce((v, q) => {
+    const d = sub(p.cpos, q.cpos);
 
-//     if (d.ρ > 0 && d.ρ < sep) {
-//       ++j;
-//       return add(v, scale(scale(d, 1 / d.ρ), 1 / d.ρ));
-//     }
+    if (d.ρ > 0 && d.ρ < sep) {
+      ++j;
+      return add(v, scale(scale(d, 1 / d.ρ), 1 / d.ρ));
+    }
 
-//     return v;
-//   }, Vec2.zero);
+    return v;
+  }, Vec2.zero);
 
-//   if (j > 0) {
-//     w =
-//   }
-// }
+  if (j > 0) {
+    w = scale(w, 1 / j);
+  }
+
+  if (w.ρ > 0) {
+    return limit(sub(scale(normalize(w), speed), p.cvel), force);
+  }
+
+  return w;
+}
 
 const numParticles = 10;
 const particles: Particle[] = [];
