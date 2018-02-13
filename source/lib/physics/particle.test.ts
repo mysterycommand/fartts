@@ -74,7 +74,7 @@ describe('Particle', () => {
     expect(testBehavior).toHaveBeenCalledTimes(1);
 
     particle.update(1);
-    expect(particle.cpos.x).toBe(6);
+    expect(particle.cpos.x).toBe(5);
     expect(particle.cpos.y).toBeCloseTo(0);
     expect(testBehavior).toHaveBeenCalledTimes(2);
   });
