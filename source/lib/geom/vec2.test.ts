@@ -1,5 +1,5 @@
 import { atan2, hypot, π } from '../math';
-import Vec2 from './vec2';
+import Vec2, { add, clone, fromPolar, lerp, normalize, scale, sub } from './vec2';
 
 describe('Vec2', () => {
   it('defaults to the origin (zero) vector', () => {
@@ -9,20 +9,20 @@ describe('Vec2', () => {
   });
 
   it('has static zero and unit vectors', () => {
-    const zero = Vec2.zero;
-    expect(zero.x).toBe(0);
-    expect(zero.y).toBe(0);
+    expect(Vec2.zero).not.toBe(Vec2.zero);
+    expect(Vec2.zero.x).toBe(0);
+    expect(Vec2.zero.y).toBe(0);
 
-    const unit = Vec2.unit;
-    expect(unit.x).toBe(1);
-    expect(unit.y).toBe(1);
+    expect(Vec2.one).not.toBe(Vec2.one);
+    expect(Vec2.one.x).toBe(1);
+    expect(Vec2.one.y).toBe(1);
   });
 
   it('does static, non-mutating addition', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
-    const c = Vec2.add(a, b);
-    const d = Vec2.add(a, Vec2.zero);
+    const c = add(a, b);
+    const d = add(a, Vec2.zero);
 
     expect(a.x).toBe(1);
     expect(a.y).toBe(2);
@@ -41,8 +41,8 @@ describe('Vec2', () => {
   it('does static, non-mutating subtraction', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
-    const c = Vec2.sub(a, b);
-    const d = Vec2.sub(a, Vec2.zero);
+    const c = sub(a, b);
+    const d = sub(a, Vec2.zero);
 
     expect(a.x).toBe(1);
     expect(a.y).toBe(2);
@@ -61,8 +61,8 @@ describe('Vec2', () => {
   it('does static, non-mutating linear interpolation', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
-    const c = Vec2.lerp(a, b, 0.5);
-    const d = Vec2.lerp(a, Vec2.zero, 0.25);
+    const c = lerp(a, b, 0.5);
+    const d = lerp(a, Vec2.zero, 0.25);
 
     expect(c.x).toBe(2);
     expect(c.y).toBe(3);
@@ -74,8 +74,8 @@ describe('Vec2', () => {
   it('does static, non-mutating scalar scaling', () => {
     const a = new Vec2(1, 2);
     const b = new Vec2(3, 4);
-    const c = Vec2.scale(a, 0.5);
-    const d = Vec2.scale(b, 2);
+    const c = scale(a, 0.5);
+    const d = scale(b, 2);
 
     expect(c.x).toBe(0.5);
     expect(c.y).toBe(1);
@@ -84,11 +84,28 @@ describe('Vec2', () => {
     expect(d.y).toBe(8);
   });
 
+  it('clones', () => {
+    const a = new Vec2(1, 2);
+    const b = clone(a);
+
+    expect(a).not.toBe(b);
+    expect(a.x).toBe(b.x);
+    expect(a.y).toBe(b.y);
+  });
+
+  it('normalizes', () => {
+    const a = normalize(new Vec2(1, 2));
+    const b = normalize(Vec2.zero);
+
+    expect(a.ρ).toBe(1);
+    expect(b.ρ).toBe(0);
+  });
+
   it('creates vectors from polar coordinates', () => {
-    const a = Vec2.fromPolar();
-    const b = Vec2.fromPolar(atan2(4, 3), 5);
-    const c = Vec2.fromPolar(π / 2, 4);
-    const d = Vec2.fromPolar(π / 4, hypot(3, 3));
+    const a = fromPolar();
+    const b = fromPolar(atan2(4, 3), 5);
+    const c = fromPolar(π / 2, 4);
+    const d = fromPolar(π / 4, hypot(3, 3));
 
     expect(a.x).toBe(0);
     expect(a.y).toBe(0);
@@ -103,12 +120,12 @@ describe('Vec2', () => {
     expect(d.y).toBe(3);
   });
 
-  it('has an angle property', () => {
+  it('has an angle property (θ)', () => {
     const v = new Vec2(3, 3);
     expect(v.θ).toBe(π / 4);
   });
 
-  it('has a length property', () => {
+  it('has a length property (ρ)', () => {
     const v = new Vec2(3, 4);
     expect(v.ρ).toBe(5);
   });

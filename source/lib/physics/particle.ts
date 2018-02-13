@@ -1,10 +1,9 @@
-import Vec2 from '../geom/vec2';
-const { add, sub, lerp, zero } = Vec2;
+import Vec2, { add, clone, lerp, sub } from '../geom/vec2';
 
 export default class Particle {
   public behaviors: Array<(p: Particle, t: number) => Vec2> = [];
 
-  public constructor(public cpos = new Vec2(), public ppos = cpos) {}
+  public constructor(public cpos = Vec2.zero, public ppos = clone(cpos)) {}
 
   public get cvel(): Vec2 {
     return sub(this.cpos, this.ppos);

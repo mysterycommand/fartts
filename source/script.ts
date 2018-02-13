@@ -1,10 +1,9 @@
 import './style.scss';
 
-import Vec2 from './lib/geom/vec2';
+import Vec2, { add, fromPolar, lerp, scale, sub } from './lib/geom/vec2';
 import { min, random, π, ππ } from './lib/math';
 import Particle from './lib/physics/particle';
 
-const { add, fromPolar, lerp, scale, zero } = Vec2;
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
 const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
@@ -30,13 +29,36 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
  * SIMULATION
  */
 
-// TODO: factor this out into a gravity (or maybe just general acceleration) behavior
-const g = new Vec2(0, 0.15);
-const gravity = () => g;
-const drag = (p: Particle) => scale(lerp(p.cvel, zero, 0.01), -1);
+// TODO: factor this out into a constant force behavior
+// const g = new Vec2(0, 0.15);
+// const gravity = () => g;
+
+// TODO: factor this out into a drag behavior
+// const d = 0.01;
+// const drag = (p: Particle) => scale(lerp(p.cvel, Vec2.zero, d), -1);
+
+// const sep = 25;
+// function separate(ps: Particle[], p: Particle) {
+//   let j = 0;
+
+//   let w = ps.reduce((v, q) => {
+//     const d = sub(p.cpos, q.cpos);
+
+//     if (d.ρ > 0 && d.ρ < sep) {
+//       ++j;
+//       return add(v, scale(scale(d, 1 / d.ρ), 1 / d.ρ));
+//     }
+
+//     return v;
+//   }, Vec2.zero);
+
+//   if (j > 0) {
+//     w =
+//   }
+// }
 
 const numParticles = 10;
-let particles: Particle[] = [];
+const particles: Particle[] = [];
 
 function init() {
   const initX = stageWidth * 0.2 + random() * stageWidth * 0.6;
@@ -47,8 +69,8 @@ function init() {
     const ppos = add(cpos, fromPolar(random() * ππ, random() * 10));
 
     const particle = new Particle(cpos, ppos);
-    particle.behaviors.push(gravity);
-    particle.behaviors.push(drag);
+    // particle.behaviors.push(gravity);
+    // particle.behaviors.push(drag);
     particles.push(particle);
   }
 }
@@ -67,7 +89,7 @@ function update(t: number): void {
     particle.update(t);
   });
 
-  particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
+  // particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
 }
 
 /**
