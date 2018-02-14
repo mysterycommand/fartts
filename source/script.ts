@@ -1,10 +1,9 @@
 import './style.scss';
 
-import Vec2 from './lib/geom/vec2';
-import { random, π, ππ } from './lib/math';
+import Vec2, { add, fromPolar, lerp, limit, normalize, scale, sub } from './lib/geom/vec2';
+import { min, random, π, ππ } from './lib/math';
 import Particle from './lib/physics/particle';
 
-const { add, fromPolar, lerp, scale, zero } = Vec2;
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
 // const playStopButton = document.getElementById('play-stop') as HTMLButtonElement;
@@ -17,8 +16,9 @@ const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
 const buffer = document.createElement('canvas') as HTMLCanvasElement;
 const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
 
-const stageWidth = canvas.clientWidth / 2;
-const stageHeight = canvas.clientHeight / 2;
+const stageScale = 2;
+const stageWidth = canvas.clientWidth / stageScale;
+const stageHeight = canvas.clientHeight / stageScale;
 const centerX = stageWidth / 2;
 const centerY = stageHeight / 2;
 
@@ -29,42 +29,119 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 /**
  * SIMULATION
  */
-const simulationStep = 1000 / 60;
-let simulationExcess = 0;
 
-// TODO: factor this out into a gravity (or maybe just general acceleration) behavior
-const gravity = new Vec2(0, 0.1);
-const drag = 0.01;
+// TODO: factor this out into a constant force behavior
+// const g = new Vec2(0, 0.15);
+// const gravity = () => g;
 
-type Behavior = (p: Particle, t: number) => Vec2;
-type BehaviorCreator = (...args: any[]) => Behavior;
+// TODO: factor this out into a drag behavior
+// const d = 0.01;
+// const drag = (p: Particle) => scale(lerp(p.cvel, Vec2.zero, d), -1);
 
-const createGravityBehavior: BehaviorCreator = (g: Vec2) => {
-  return (p: Particle, t: number) => scale(g, t * t);
-};
+const speed = 3 / stageScale;
+const force = 0.025 / stageScale;
 
-const createDragBehavior: BehaviorCreator = (d: number) => {
-  return (p: Particle, t: number) => lerp(p.cvel, zero, d * t);
-};
+function getSeparate(ps: Particle[], dist: number = 40 / stageScale): (p: Particle) => Vec2 {
+  return (p: Particle): Vec2 => {
+    let j = 0;
 
-const gravityBehavior: Behavior = createGravityBehavior(gravity);
-const dragBehavior: Behavior = createDragBehavior(drag);
+    let w = ps.reduce((v, q) => {
+      const d = sub(p.cpos, q.cpos);
 
-const numParticles = 500;
-let particles: Particle[] = [];
+      if (d.ρ > 0 && d.ρ < dist) {
+        ++j;
+        return add(v, scale(scale(d, 1 / d.ρ), 1 / d.ρ));
+      }
+
+      return v;
+    }, Vec2.zero);
+
+    if (j > 0) {
+      w = scale(w, 1 / j);
+    }
+
+    if (w.ρ > 0) {
+      return scale(limit(sub(scale(normalize(w), speed), p.cvel), force), 1.5);
+    }
+
+    return w;
+  };
+}
+
+function getAlign(ps: Particle[], dist: number = 100 / stageScale): (p: Particle) => Vec2 {
+  return (p: Particle): Vec2 => {
+    let j = 0;
+
+    let w = ps.reduce((v, q) => {
+      const d = sub(p.cpos, q.cpos);
+
+      if (d.ρ > 0 && d.ρ < dist) {
+        ++j;
+        return add(v, q.cvel);
+      }
+
+      return v;
+    }, Vec2.zero);
+
+    if (j > 0) {
+      w = scale(w, 1 / j);
+      return limit(sub(scale(normalize(w), speed), p.cvel), force);
+    }
+
+    return Vec2.zero;
+  };
+}
+
+function getCohere(ps: Particle[], dist: number = 100 / stageScale): (p: Particle) => Vec2 {
+  return (p: Particle): Vec2 => {
+    let j = 0;
+
+    let w = ps.reduce((v, q) => {
+      const d = sub(p.cpos, q.cpos);
+
+      if (d.ρ > 0 && d.ρ < dist) {
+        ++j;
+        return add(v, q.cpos);
+      }
+
+      return v;
+    }, Vec2.zero);
+
+    if (j > 0) {
+      w = scale(w, 1 / j);
+      return limit(sub(scale(normalize(sub(w, p.cpos)), speed), p.cvel), force);
+    }
+
+    return Vec2.zero;
+  };
+}
+
+const numParticles = 50;
+const particles: Particle[] = [];
+
+const separate = getSeparate(particles);
+const align = getAlign(particles);
+const cohere = getCohere(particles);
+
+const origin = new Vec2(centerX, centerY);
 
 function init() {
-  const particleX = stageWidth * 0.2 + random() * stageWidth * 0.6;
-  const particleY = stageHeight * 0.2 + random() * stageHeight * 0.6;
+  // const initX = stageWidth * 0.2 + random() * stageWidth * 0.6;
+  // const initY = stageHeight * 0.2 + random() * stageHeight * 0.6;
 
   for (let i = 0; i < numParticles; ++i) {
-    const cpos = new Vec2(particleX, particleY);
-    const ppos = add(cpos, fromPolar(random() * ππ, random() * 4));
+    const cpos = add(origin, fromPolar(i / numParticles * ππ, random() * 20));
+    const ppos = add(cpos, fromPolar(random() * ππ, 1));
 
     const particle = new Particle(cpos, ppos);
-    particle.behaviors.push(gravityBehavior);
-    particle.behaviors.push(dragBehavior);
     particles.push(particle);
+
+    // particle.behaviors.push(gravity);
+    // particle.behaviors.push(drag);
+
+    particle.behaviors.push(separate);
+    particle.behaviors.push(align);
+    particle.behaviors.push(cohere);
   }
 }
 
@@ -78,11 +155,45 @@ function update(t: number): void {
   }
 
   particles.forEach(particle => {
-    // console.log(particle.vel); // tslint:disable-line
-    particle.update(1);
+    // console.log(t); // tslint:disable-line
+    particle.update(t);
+
+    const { cpos: { x, y }, cvel } = particle;
+    let move = Vec2.zero;
+
+    if (y < 0) {
+      move = new Vec2(0, stageHeight);
+      particle.ppos = add(particle.ppos, move);
+      particle.cpos = add(particle.cpos, move);
+    }
+
+    if (x < 0) {
+      move = new Vec2(stageWidth, 0);
+      particle.ppos = add(particle.ppos, move);
+      particle.cpos = add(particle.cpos, move);
+    }
+
+    if (x > stageWidth) {
+      move = new Vec2(stageWidth, 0);
+      particle.ppos = sub(particle.ppos, move);
+      particle.cpos = sub(particle.cpos, move);
+    }
+
+    if (y > stageHeight) {
+      move = new Vec2(0, stageHeight);
+      particle.ppos = sub(particle.ppos, move);
+      particle.cpos = sub(particle.cpos, move);
+    }
   });
 
-  particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
+  // particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
+  // particles = particles.filter(({ cpos: { x, y } }) => {
+  //   const top = 0 < y;
+  //   const right = x < stageWidth;
+  //   const bottom = y < stageHeight;
+  //   const left = 0 < x;
+  //   return top && right && bottom && left;
+  // });
 }
 
 /**
@@ -111,14 +222,17 @@ function draw(i: number): void {
     bufferContext.translate(x, y);
     bufferContext.rotate(θ);
 
-    const l = ρ * 2;
+    const s = 20 / stageScale;
+    const l = ρ * s * 2;
     const hl = l / 2;
-    bufferContext.rect(-hl, -0.5, l, 1);
+    const w = s / 2;
+    const hw = w / 2;
+    bufferContext.rect(-hl, -hw, l, w);
     bufferContext.fill();
 
     bufferContext.restore();
 
-    return performance.now() - start > simulationStep / 2;
+    return performance.now() - start > step / 2;
   });
 
   canvasContext.drawImage(buffer, 0, 0);
@@ -127,6 +241,9 @@ function draw(i: number): void {
 /**
  * GAME-LOOP
  */
+const step = 1000 / 60;
+let excess = 0;
+
 let frameId = -1;
 
 // resets everytime you click 'play'
@@ -144,14 +261,15 @@ function tick(time: number): void {
   deltaTime = normalTime - previousTime;
 
   previousTime = normalTime;
-  simulationExcess += deltaTime;
+  excess += deltaTime;
 
-  while (simulationExcess >= simulationStep) {
-    update(simulationStep);
-    simulationExcess -= simulationStep;
+  excess = min(excess, 1000);
+  while (excess >= step) {
+    update(step);
+    excess -= step;
   }
 
-  draw(simulationExcess / simulationStep);
+  draw(excess / step);
 }
 
 function play(): void {
@@ -161,7 +279,7 @@ function play(): void {
   frameId = rAF((time: number) => {
     firstTime = time;
     previousTime = 0;
-    simulationExcess = 0;
+    excess = 0;
 
     frameId = rAF(tick);
   });
@@ -177,7 +295,7 @@ function stop(): void {
 
 function goto(f: number): void {
   for (let i = 0; i < f; ++i) {
-    update(simulationStep);
+    update(step);
   }
 
   draw(1);
@@ -188,4 +306,5 @@ function toggle(): void {
 }
 
 // playStopButton.addEventListener('click', toggle);
+// goto(3);
 play();

@@ -8,6 +8,7 @@ canvas {
 
 body {
   margin: 0;
+  font-family: sans-serif;
 }
 
 main {
@@ -21,4 +22,6 @@ main {
 canvas {
   background: black;
   image-rendering: pixelated;
+  // width: 800px;
+  // height: 450px;
 }
