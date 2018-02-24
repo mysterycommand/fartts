@@ -24,22 +24,22 @@
     "seedrandom": "^2.4.3"
   },
   "devDependencies": {
-    "@types/jest": "^22.1.2",
+    "@types/jest": "^22.1.3",
     "@types/seedrandom": "^2.4.27",
     "commitizen": "^2.9.6",
     "coveralls": "^3.0.0",
     "cz-conventional-changelog": "^2.1.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^22.2.2",
+    "jest": "^22.4.2",
     "node-sass": "^4.7.2",
-    "parcel-bundler": "^1.5.1",
+    "parcel-bundler": "^1.6.2",
     "prettier": "^1.10.2",
     "sass-lint": "^1.12.1",
     "ts-jest": "^22.0.4",
     "tslint": "^5.9.1",
-    "tslint-config-prettier": "^1.7.0",
+    "tslint-config-prettier": "^1.8.0",
     "tslint-plugin-prettier": "^1.3.0",
-    "typescript": "^2.7.1"
+    "typescript": "^2.7.2"
   },
   "config": {
     "commitizen": {
