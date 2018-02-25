@@ -147,16 +147,17 @@ function init() {
 
 /**
  * update: updates the simulation
- * @param t {number} - the number of miliseconds to simulate
+ * @param t {number} - the number of miliseconds that have ellapsed since start
+ * @param dt {number} - the number of miliseconds to simulate
  */
-function update(t: number): void {
+function update(t: number, dt: number): void {
   if (particles.length === 0) {
     init();
   }
 
   particles.forEach(particle => {
     // console.log(t); // tslint:disable-line
-    particle.update(t);
+    particle.update(t, dt);
 
     const { cpos: { x, y }, cvel } = particle;
     let move = Vec2.zero;
@@ -265,7 +266,7 @@ function tick(time: number): void {
 
   excess = min(excess, 1000);
   while (excess >= step) {
-    update(step);
+    update(normalTime, step);
     excess -= step;
   }
 
@@ -294,8 +295,11 @@ function stop(): void {
 }
 
 function goto(f: number): void {
+  normalTime = 0;
+
   for (let i = 0; i < f; ++i) {
-    update(step);
+    normalTime += step;
+    update(normalTime, step);
   }
 
   draw(1);
