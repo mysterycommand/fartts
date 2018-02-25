@@ -1,7 +1,9 @@
 import Vec2, { add, clone, lerp, limit, sub } from '../geom/vec2';
 
+type Behavior = (p: Particle, t: number, dt: number) => Vec2;
+
 export default class Particle {
-  public behaviors: Array<(p: Particle, t: number, dt: number) => Vec2> = [];
+  public behaviors: Behavior[] = [];
 
   public constructor(public cpos = Vec2.zero, public ppos = clone(cpos)) {}
 

@@ -61,7 +61,6 @@
         "statements": 100
       }
     },
-    "mapCoverage": true,
     "moduleFileExtensions": [
       "ts",
       "js",
