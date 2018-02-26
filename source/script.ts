@@ -1,8 +1,12 @@
 import './style.scss';
 
 import Vec2, { add, fromPolar, lerp, limit, normalize, scale, sub } from './lib/geom/vec2';
-import { min, random, π, ππ } from './lib/math';
+import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
 import Particle from './lib/physics/particle';
+
+import reginaldUrl from './images/reginald-teeth-banana.png';
+const reginald = new Image(128, 1024);
+const rs = 3;
 
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
@@ -41,7 +45,7 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 const speed = 3 / stageScale;
 const force = 0.025 / stageScale;
 
-function getSeparate(ps: Particle[], dist: number = 40 / stageScale): (p: Particle) => Vec2 {
+function getSeparate(ps: Particle[], dist: number = 50 / stageScale): (p: Particle) => Vec2 {
   return (p: Particle): Vec2 => {
     let j = 0;
 
@@ -116,7 +120,7 @@ function getCohere(ps: Particle[], dist: number = 100 / stageScale): (p: Particl
   };
 }
 
-const numParticles = 50;
+const numParticles = 20;
 const particles: Particle[] = [];
 
 const separate = getSeparate(particles);
@@ -162,26 +166,26 @@ function update(t: number, dt: number): void {
     const { cpos: { x, y }, cvel } = particle;
     let move = Vec2.zero;
 
-    if (y < 0) {
-      move = new Vec2(0, stageHeight);
+    if (y < 0 - (128 - 96) / rs) {
+      move = new Vec2(0, stageHeight + 128 / rs);
       particle.ppos = add(particle.ppos, move);
       particle.cpos = add(particle.cpos, move);
     }
 
-    if (x < 0) {
-      move = new Vec2(stageWidth, 0);
+    if (x < -64 / rs) {
+      move = new Vec2(stageWidth + 128 / rs, 0);
       particle.ppos = add(particle.ppos, move);
       particle.cpos = add(particle.cpos, move);
     }
 
-    if (x > stageWidth) {
-      move = new Vec2(stageWidth, 0);
+    if (x > stageWidth + 64 / rs) {
+      move = new Vec2(stageWidth + 128 / rs, 0);
       particle.ppos = sub(particle.ppos, move);
       particle.cpos = sub(particle.cpos, move);
     }
 
-    if (y > stageHeight) {
-      move = new Vec2(0, stageHeight);
+    if (y > stageHeight + 96 / rs) {
+      move = new Vec2(0, stageHeight + 128 / rs);
       particle.ppos = sub(particle.ppos, move);
       particle.cpos = sub(particle.cpos, move);
     }
@@ -207,34 +211,42 @@ function update(t: number, dt: number): void {
  * has yet to be simulated this frame as a percentage of the simulation step
  */
 function draw(i: number): void {
-  bufferContext.clearRect(0, 0, stageWidth, stageHeight);
-  canvasContext.clearRect(0, 0, stageWidth, stageHeight);
+  bufferContext.fillStyle = 'gray';
+  bufferContext.fillRect(0, 0, stageWidth, stageHeight);
 
   const start = performance.now();
-  particles.some(particle => {
-    const { cvel: { θ, ρ } } = particle;
-    const { x, y } = particle.ipos(i);
+  particles
+    .sort((a, b) => {
+      return a.ipos(i).y - b.ipos(i).y;
+    })
+    .some(particle => {
+      const { cvel: { θ, ρ } } = particle;
+      const { x, y } = particle.ipos(i);
+      const frame = floor(((round(toDegrees(θ + π)) + 22.5) % 360) / 45);
 
-    bufferContext.save();
+      bufferContext.save();
 
-    bufferContext.beginPath();
-    bufferContext.fillStyle = `hsl(${θ * 180 / π},100%,50%)`;
+      bufferContext.translate(x, y);
+      bufferContext.filter = [
+        `drop-shadow(0px 1px 2px rgba(0,0,0,0.3))`,
+        // `hue-rotate(${toDegrees(θ + π)}deg)`,
+      ].join(' ');
+      bufferContext.drawImage(
+        reginald,
+        0,
+        128 * frame,
+        128,
+        128,
+        -64 / rs,
+        -96 / rs,
+        128 / rs,
+        128 / rs,
+      );
 
-    bufferContext.translate(x, y);
-    bufferContext.rotate(θ);
+      bufferContext.restore();
 
-    const s = 20 / stageScale;
-    const l = ρ * s * 2;
-    const hl = l / 2;
-    const w = s / 2;
-    const hw = w / 2;
-    bufferContext.rect(-hl, -hw, l, w);
-    bufferContext.fill();
-
-    bufferContext.restore();
-
-    return performance.now() - start > step / 2;
-  });
+      return performance.now() - start > step / 2;
+    });
 
   canvasContext.drawImage(buffer, 0, 0);
 }
@@ -311,4 +323,10 @@ function toggle(): void {
 
 // playStopButton.addEventListener('click', toggle);
 // goto(3);
-play();
+// play();
+
+reginald.addEventListener('load', event => {
+  play();
+});
+
+reginald.src = reginaldUrl;
