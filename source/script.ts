@@ -20,7 +20,7 @@ const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
 const buffer = document.createElement('canvas') as HTMLCanvasElement;
 const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
 
-const stageScale = 2;
+const stageScale = 1;
 const stageWidth = canvas.clientWidth / stageScale;
 const stageHeight = canvas.clientHeight / stageScale;
 const centerX = stageWidth / 2;
@@ -45,7 +45,7 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 const speed = 3 / stageScale;
 const force = 0.025 / stageScale;
 
-function getSeparate(ps: Particle[], dist: number = 50 / stageScale): (p: Particle) => Vec2 {
+function getSeparate(ps: Particle[], dist: number = 60 / stageScale): (p: Particle) => Vec2 {
   return (p: Particle): Vec2 => {
     let j = 0;
 
@@ -120,7 +120,7 @@ function getCohere(ps: Particle[], dist: number = 100 / stageScale): (p: Particl
   };
 }
 
-const numParticles = 20;
+const numParticles = 50;
 const particles: Particle[] = [];
 
 const separate = getSeparate(particles);
@@ -134,7 +134,7 @@ function init() {
   // const initY = stageHeight * 0.2 + random() * stageHeight * 0.6;
 
   for (let i = 0; i < numParticles; ++i) {
-    const cpos = add(origin, fromPolar(i / numParticles * ππ, random() * 20));
+    const cpos = add(origin, fromPolar(i / numParticles * ππ, random() * 100));
     const ppos = add(cpos, fromPolar(random() * ππ, 1));
 
     const particle = new Particle(cpos, ppos);
