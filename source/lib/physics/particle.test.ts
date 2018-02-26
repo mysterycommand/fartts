@@ -43,11 +43,11 @@ describe('Particle', () => {
     expect(p.cpos.x).toBe(0);
     expect(p.cpos.y).toBe(0);
 
-    p.update(1);
+    p.update(0, 1);
     expect(p.cpos.x).toBe(1);
     expect(p.cpos.y).toBeCloseTo(0);
 
-    p.update(1);
+    p.update(0, 1);
     expect(p.cpos.x).toBe(2);
     expect(p.cpos.y).toBeCloseTo(0);
   });
@@ -68,12 +68,12 @@ describe('Particle', () => {
     expect(particle.cpos.y).toBeCloseTo(0);
     expect(testBehavior).not.toHaveBeenCalled();
 
-    particle.update(1);
+    particle.update(0, 1);
     expect(particle.cpos.x).toBe(2);
     expect(particle.cpos.y).toBeCloseTo(0);
     expect(testBehavior).toHaveBeenCalledTimes(1);
 
-    particle.update(1);
+    particle.update(0, 1);
     expect(particle.cpos.x).toBe(5);
     expect(particle.cpos.y).toBeCloseTo(0);
     expect(testBehavior).toHaveBeenCalledTimes(2);

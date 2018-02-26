@@ -1,7 +1,9 @@
 import Vec2, { add, clone, lerp, limit, sub } from '../geom/vec2';
 
+type Behavior = (p: Particle, t: number, dt: number) => Vec2;
+
 export default class Particle {
-  public behaviors: Array<(p: Particle, t: number) => Vec2> = [];
+  public behaviors: Behavior[] = [];
 
   public constructor(public cpos = Vec2.zero, public ppos = clone(cpos)) {}
 
@@ -13,9 +15,9 @@ export default class Particle {
     return lerp(this.cpos, this.ppos, i);
   }
 
-  public update(t: number): void {
+  public update(t: number, dt: number): void {
     const { cpos } = this;
-    const nvel = limit(this.nvel(t), 3);
+    const nvel = limit(this.nvel(t, dt), 3);
 
     this.ppos = clone(cpos);
     this.cpos = add(cpos, nvel);
@@ -23,8 +25,8 @@ export default class Particle {
     // constraints: distance, bounds, etc...
   }
 
-  private nvel(t: number): Vec2 {
+  private nvel(t: number, dt: number): Vec2 {
     const { behaviors, cvel } = this;
-    return behaviors.reduce((v, b) => add(v, b(this, t)), cvel);
+    return behaviors.reduce((v, b) => add(v, b(this, t, dt)), cvel);
   }
 }
