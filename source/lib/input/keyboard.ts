@@ -73,6 +73,7 @@ export enum KeyCode {
   ArrowUp = 'ArrowUp',
   ArrowRight = 'ArrowRight',
   ArrowDown = 'ArrowDown',
+  None = 'None',
 }
 
 export default class Keyboard {
@@ -84,7 +85,7 @@ export default class Keyboard {
     return code in KeyCode;
   }
 
-  private keysDown: { [keyCode in KeyCode]: boolean } = Object.values(KeyCode).reduce(
+  public keysDown: { [keyCode in KeyCode]: boolean } = Object.values(KeyCode).reduce(
     (keysDown, keyCode) => {
       keysDown[keyCode] = false;
       return keysDown;
@@ -96,10 +97,6 @@ export default class Keyboard {
     Object.values(KeyboardEventType).forEach(type => {
       context.addEventListener(type, this.onKey);
     });
-  }
-
-  public isDown(keyCode: KeyCode): boolean {
-    return this.keysDown[keyCode];
   }
 
   private onKey = (event: Event) => {
