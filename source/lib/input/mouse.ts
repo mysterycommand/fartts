@@ -1,6 +1,6 @@
 import Vec2, { clone, sub } from '../geom/vec2';
 
-enum MouseEventType {
+export enum MouseEventType {
   MouseEnter = 'mouseenter',
   MouseLeave = 'mouseleave',
   MouseMove = 'mousemove',
@@ -12,7 +12,7 @@ enum MouseEventType {
   // DblClick = 'dblclick',
 }
 
-enum WheelEventType {
+export enum WheelEventType {
   Wheel = 'wheel',
 }
 
@@ -51,7 +51,7 @@ export default class Mouse {
     });
   }
 
-  private onMouse = (event: Event) => {
+  public onMouse = (event: Event) => {
     event.stopPropagation();
     event.preventDefault();
 
@@ -60,7 +60,7 @@ export default class Mouse {
     }
 
     if (event.type === MouseEventType.MouseEnter) {
-      this.currPos = new Vec2(event.pageX, event.pageY);
+      this.currPos = new Vec2(event.clientX, event.clientY);
     }
 
     if (event.type === MouseEventType.MouseDown) {
@@ -72,17 +72,15 @@ export default class Mouse {
     }
 
     this.prevPos = clone(this.currPos);
-    this.currPos = new Vec2(event.pageX, event.pageY);
+    this.currPos = new Vec2(event.clientX, event.clientY);
 
     this.altKey = event.altKey;
     this.ctrlKey = event.ctrlKey;
     this.metaKey = event.metaKey;
     this.shiftKey = event.shiftKey;
-
-    // this.dispatchEvent(new Event(event.type));
   };
 
-  private onWheel = (event: Event) => {
+  public onWheel = (event: Event) => {
     event.stopPropagation();
     event.preventDefault();
 
@@ -91,7 +89,5 @@ export default class Mouse {
     }
 
     this.wheel = new Vec2(event.deltaX, event.deltaY);
-
-    // this.dispatchEvent(new Event(event.type));
   };
 }

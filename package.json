@@ -17,9 +17,9 @@
     "lint": "yarn lint:tslint ; yarn lint:sass-lint",
     "lint:tslint": "tslint 'source/**/*.ts'",
     "lint:sass-lint": "sass-lint -v 'source/**/*.scss'",
-    "test": "yarn jest && yarn coveralls",
-    "test:jest": "jest",
-    "test:coveralls": "cat ./coverage/lcov.info | yarn report",
+    "test:ci": "yarn test && yarn coverage",
+    "test": "jest",
+    "coverage": "cat ./coverage/lcov.info | yarn report",
     "report": "if [ \"${CI}\" ]; then (coveralls) fi"
   },
   "dependencies": {

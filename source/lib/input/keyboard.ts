@@ -1,4 +1,4 @@
-enum KeyboardEventType {
+export enum KeyboardEventType {
   KeyDown = 'keydown',
 
   // @todo: need a way to re-dispatch/emit this one?
@@ -99,7 +99,7 @@ export default class Keyboard {
     });
   }
 
-  private onKey = (event: Event) => {
+  public onKey = (event: Event) => {
     event.stopPropagation();
     event.preventDefault();
 
