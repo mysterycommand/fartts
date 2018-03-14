@@ -18,7 +18,7 @@ enum WheelEventType {
 
 export default class Mouse {
   public static isMouseEvent(event: Event): event is MouseEvent {
-    return event instanceof MouseEvent || event instanceof WheelEvent;
+    return event instanceof MouseEvent;
   }
 
   public static isWheelEvent(event: Event): event is WheelEvent {
