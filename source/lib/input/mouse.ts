@@ -1,16 +1,18 @@
 import Vec2, { clone, sub } from '../geom/vec2';
 
-export enum MouseEventType {
+enum MouseEventType {
   MouseEnter = 'mouseenter',
   MouseLeave = 'mouseleave',
   MouseMove = 'mousemove',
   MouseDown = 'mousedown',
   MouseUp = 'mouseup',
-  Click = 'click',
-  DblClick = 'dblclick',
+
+  // @todo: need a way to re-dispatch/emit these
+  // Click = 'click',
+  // DblClick = 'dblclick',
 }
 
-export enum WheelEventType {
+enum WheelEventType {
   Wheel = 'wheel',
 }
 

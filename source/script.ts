@@ -1,12 +1,7 @@
 import './style.scss';
 
-import Mouse/* , { MouseEventType, WheelEventType } */ from './lib/input/mouse';
+import Keyboard from './lib/input/keyboard';
+import Mouse from './lib/input/mouse';
 
+const keyboard = new Keyboard(document);
 const mouse = new Mouse(document);
-
-// Object.values({
-//   ...MouseEventType,
-//   ...WheelEventType,
-// }).forEach(type => mouse.addEventListener(type, event => {
-//   console.log(event); // tslint:disable-line no-console
-// }))
