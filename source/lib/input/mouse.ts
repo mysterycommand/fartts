@@ -1,6 +1,6 @@
 import Vec2, { clone, sub } from '../geom/vec2';
 
-enum MouseEventType {
+export enum MouseEventType {
   MouseEnter = 'mouseenter',
   MouseLeave = 'mouseleave',
   MouseMove = 'mousemove',
@@ -8,24 +8,27 @@ enum MouseEventType {
   MouseUp = 'mouseup',
   Click = 'click',
   DblClick = 'dblclick',
+}
+
+export enum WheelEventType {
   Wheel = 'wheel',
 }
 
 export default class Mouse {
-  public static isWheelEvent(event: Event): event is WheelEvent {
-    return event instanceof WheelEvent;
-  }
-
   public static isMouseEvent(event: Event): event is MouseEvent {
     return event instanceof MouseEvent || event instanceof WheelEvent;
   }
 
-  public get cvel(): Vec2 {
+  public static isWheelEvent(event: Event): event is WheelEvent {
+    return event instanceof WheelEvent;
+  }
+
+  public get currVel(): Vec2 {
     return sub(this.currPos, this.prevPos);
   }
 
-  public currPos: Vec2 = new Vec2();
   public prevPos: Vec2 = new Vec2();
+  public currPos: Vec2 = new Vec2();
 
   public isDown: boolean = false;
 
@@ -40,36 +43,53 @@ export default class Mouse {
     Object.values(MouseEventType).forEach(type => {
       context.addEventListener(type, this.onMouse);
     });
+
+    Object.values(WheelEventType).forEach(type => {
+      context.addEventListener(type, this.onWheel);
+    });
   }
 
   private onMouse = (event: Event) => {
     event.stopPropagation();
     event.preventDefault();
 
-    if (Mouse.isMouseEvent(event)) {
-      if (event.type === MouseEventType.MouseEnter) {
-        this.currPos = new Vec2(event.pageX, event.pageY);
-      }
+    if (!Mouse.isMouseEvent(event)) {
+      return;
+    }
 
-      if (event.type === MouseEventType.MouseDown) {
-        this.isDown = true;
-      }
-
-      if (event.type === MouseEventType.MouseUp) {
-        this.isDown = false;
-      }
-
-      this.prevPos = clone(this.currPos);
+    if (event.type === MouseEventType.MouseEnter) {
       this.currPos = new Vec2(event.pageX, event.pageY);
-
-      this.altKey = event.altKey;
-      this.ctrlKey = event.ctrlKey;
-      this.metaKey = event.metaKey;
-      this.shiftKey = event.shiftKey;
     }
 
-    if (Mouse.isWheelEvent(event)) {
-      this.wheel = new Vec2(event.deltaX, event.deltaY);
+    if (event.type === MouseEventType.MouseDown) {
+      this.isDown = true;
     }
+
+    if (event.type === MouseEventType.MouseUp) {
+      this.isDown = false;
+    }
+
+    this.prevPos = clone(this.currPos);
+    this.currPos = new Vec2(event.pageX, event.pageY);
+
+    this.altKey = event.altKey;
+    this.ctrlKey = event.ctrlKey;
+    this.metaKey = event.metaKey;
+    this.shiftKey = event.shiftKey;
+
+    // this.dispatchEvent(new Event(event.type));
+  };
+
+  private onWheel = (event: Event) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (!Mouse.isWheelEvent(event)) {
+      return;
+    }
+
+    this.wheel = new Vec2(event.deltaX, event.deltaY);
+
+    // this.dispatchEvent(new Event(event.type));
   };
 }
