@@ -1,11 +1,6 @@
 import './style.scss';
 
-import Keyboard, { KeyCode } from './lib/input/keyboard';
-import Mouse from './lib/input/mouse';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
-
-const keyboard = new Keyboard(document);
-const mouse = new Mouse(document);
 
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
