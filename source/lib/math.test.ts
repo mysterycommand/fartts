@@ -1,4 +1,10 @@
-import { toDegrees, toRadians, π, ππ } from './math';
+import { randomBool, toDegrees, toRadians, π, ππ } from './math';
+
+test('randomBool', () => {
+  expect(randomBool()).toBe(false);
+  expect(randomBool()).toBe(false);
+  expect(randomBool()).toBe(true);
+});
 
 test('toDegrees', () => {
   expect(toDegrees(0)).toBe(0);

@@ -4,6 +4,10 @@ export const random = seedRandom('fart.ts');
 export const { atan2, cos, floor, hypot, max, min, PI: π, round, sin, sqrt } = Math;
 export const ππ = π * 2;
 
+export function randomBool(): boolean {
+  return round(random()) === 1;
+}
+
 /**
  * ## toDegrees
  * takes an angle in radians and returns that angle in degrees
