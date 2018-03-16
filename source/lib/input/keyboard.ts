@@ -93,9 +93,9 @@ export default class Keyboard {
     {},
   );
 
-  constructor(private context: EventTarget) {
+  constructor(private eventTarget: EventTarget) {
     Object.values(KeyboardEventType).forEach(type => {
-      context.addEventListener(type, this.onKey);
+      eventTarget.addEventListener(type, this.onKey);
     });
   }
 

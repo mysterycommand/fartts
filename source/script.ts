@@ -1,11 +1,14 @@
 import './style.scss';
 
-import Keyboard, { KeyCode } from './lib/input/keyboard';
-import Mouse from './lib/input/mouse';
+import constantForceBehaviorFactory from './lib/behaviors/constant-force-behavior';
+import AngularConstraint from './lib/constraints/angular-constraint';
+import BoundsConstraint from './lib/constraints/bounds-constraint';
+import DistanceConstraint from './lib/constraints/distance-constraint';
+import Rect from './lib/geom/rect';
+import Vec2, { add, fromPolar } from './lib/geom/vec2';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
-
-const keyboard = new Keyboard(document);
-const mouse = new Mouse(document);
+import Aggregate from './lib/physics/aggregate';
+import Particle from './lib/physics/particle';
 
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
@@ -25,175 +28,227 @@ canvas.width = buffer.width = stageWidth;
 canvas.height = buffer.height = stageHeight;
 canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = false;
 
-const rows = [
-  [
-    KeyCode.Escape,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-    KeyCode.None,
-  ],
-  [
-    KeyCode.Backquote,
-    KeyCode.Digit1,
-    KeyCode.Digit2,
-    KeyCode.Digit3,
-    KeyCode.Digit4,
-    KeyCode.Digit5,
-    KeyCode.Digit6,
-    KeyCode.Digit7,
-    KeyCode.Digit8,
-    KeyCode.Digit9,
-    KeyCode.Digit0,
-    KeyCode.Minus,
-    KeyCode.Equal,
-    KeyCode.Backspace,
-  ],
-  [
-    KeyCode.Tab,
-    KeyCode.KeyQ,
-    KeyCode.KeyW,
-    KeyCode.KeyE,
-    KeyCode.KeyR,
-    KeyCode.KeyT,
-    KeyCode.KeyY,
-    KeyCode.KeyU,
-    KeyCode.KeyI,
-    KeyCode.KeyO,
-    KeyCode.KeyP,
-    KeyCode.BracketLeft,
-    KeyCode.BracketRight,
-    KeyCode.Backslash,
-  ],
-  [
-    KeyCode.CapsLock,
-    KeyCode.KeyA,
-    KeyCode.KeyS,
-    KeyCode.KeyD,
-    KeyCode.KeyF,
-    KeyCode.KeyG,
-    KeyCode.KeyH,
-    KeyCode.KeyJ,
-    KeyCode.KeyK,
-    KeyCode.KeyL,
-    KeyCode.Semicolon,
-    KeyCode.Quote,
-    KeyCode.Enter,
-  ],
-  [
-    KeyCode.ShiftLeft,
-    KeyCode.KeyZ,
-    KeyCode.KeyX,
-    KeyCode.KeyC,
-    KeyCode.KeyV,
-    KeyCode.KeyB,
-    KeyCode.KeyN,
-    KeyCode.KeyM,
-    KeyCode.Comma,
-    KeyCode.Period,
-    KeyCode.Slash,
-    KeyCode.ShiftRight,
-  ],
-  [
-    KeyCode.None,
-    KeyCode.ControlLeft,
-    KeyCode.AltLeft,
-    KeyCode.MetaLeft,
-    KeyCode.Space,
-    KeyCode.MetaRight,
-    KeyCode.AltRight,
-    KeyCode.ArrowLeft,
-    KeyCode.ArrowUp,
-    KeyCode.ArrowRight,
-    KeyCode.ArrowDown,
-  ],
+/**
+ * SIMULATION
+ */
+
+const gravity = new Vec2(0, 0.2);
+const gravityBehavior = constantForceBehaviorFactory(gravity);
+
+const bounds = new Rect(new Vec2(10, 10), new Vec2(stageWidth - 10, stageHeight - 10));
+
+const origin = new Vec2(stageCenterX, stageCenterY);
+const torsoRadius = 50;
+const armLength = 65;
+const legLength = 50;
+
+const rShoulder = new Particle(add(origin, fromPolar(π * 1.25, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const lShoulder = new Particle(add(origin, fromPolar(π * 1.75, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const lHip = new Particle(add(origin, fromPolar(π * 0.25, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const rHip = new Particle(add(origin, fromPolar(π * 0.75, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const torso = new Particle(origin, undefined, [gravityBehavior]);
+
+const rElbow = new Particle(add(rShoulder.currPos, fromPolar(π * 0.65, armLength)), undefined, [
+  gravityBehavior,
+]);
+const rWrist = new Particle(add(rElbow.currPos, fromPolar(π * 0.65, armLength)), undefined, [
+  gravityBehavior,
+]);
+const rKnee = new Particle(add(rHip.currPos, fromPolar(π * 0.55, legLength)), undefined, [
+  gravityBehavior,
+]);
+const rAnkle = new Particle(add(rKnee.currPos, fromPolar(π * 0.55, legLength)), undefined, [
+  gravityBehavior,
+]);
+
+const lElbow = new Particle(add(lShoulder.currPos, fromPolar(π * 0.35, armLength)), undefined, [
+  gravityBehavior,
+]);
+const lWrist = new Particle(add(lElbow.currPos, fromPolar(π * 0.35, armLength)), undefined, [
+  gravityBehavior,
+]);
+const lKnee = new Particle(add(lHip.currPos, fromPolar(π * 0.45, legLength)), undefined, [
+  gravityBehavior,
+]);
+const lAnkle = new Particle(add(lKnee.currPos, fromPolar(π * 0.45, legLength)), undefined, [
+  gravityBehavior,
+]);
+
+const puppetParticles = [
+  rShoulder,
+  lShoulder,
+  lHip,
+  rHip,
+  torso,
+
+  rWrist,
+  rElbow,
+  rAnkle,
+  rKnee,
+  lWrist,
+  lElbow,
+  lAnkle,
+  lKnee,
 ];
 
-const mostColumns = rows.reduce((cols, { length }) => (length > cols ? length : cols), 0);
+const puppetConstraints = [
+  new DistanceConstraint(torso, rShoulder),
+  new DistanceConstraint(torso, lShoulder),
+  new DistanceConstraint(torso, rHip),
+  new DistanceConstraint(torso, lHip),
 
-const keySize = stageWidth / mostColumns;
+  new DistanceConstraint(rShoulder, lHip),
+  new DistanceConstraint(lShoulder, rHip),
 
-function draw(/* i: number */): void {
-  bufferContext.fillStyle = '#666';
+  new DistanceConstraint(rShoulder, lShoulder),
+  new DistanceConstraint(lShoulder, lHip),
+  new DistanceConstraint(lHip, rHip),
+  new DistanceConstraint(rHip, rShoulder),
+
+  new DistanceConstraint(rShoulder, rElbow),
+  new DistanceConstraint(rElbow, rWrist),
+  new DistanceConstraint(lShoulder, lElbow),
+  new DistanceConstraint(lElbow, lWrist),
+
+  new DistanceConstraint(rHip, rKnee),
+  new DistanceConstraint(rKnee, rAnkle),
+  new DistanceConstraint(lHip, lKnee),
+  new DistanceConstraint(lKnee, lAnkle),
+
+  new AngularConstraint(rWrist, rElbow, rShoulder, 0.1),
+  new AngularConstraint(lWrist, lElbow, lShoulder, 0.1),
+  new AngularConstraint(rElbow, rShoulder, rHip, 0.1),
+  new AngularConstraint(lElbow, lShoulder, lHip, 0.1),
+
+  new AngularConstraint(rAnkle, rKnee, rHip),
+  new AngularConstraint(lAnkle, lKnee, lHip),
+  new AngularConstraint(rKnee, rHip, rShoulder),
+  new AngularConstraint(lKnee, lHip, lShoulder),
+
+  new BoundsConstraint(puppetParticles, bounds),
+];
+
+const puppet = new Aggregate(puppetParticles, puppetConstraints);
+
+/**
+ * update: updates the simulation
+ * @param t {number} - the number of miliseconds that have ellapsed since start
+ * @param dt {number} - the number of miliseconds to simulate
+ */
+function update(t: number, dt: number): void {
+  // do stuff with particles/bodies here
+  puppet.update(t, dt);
+}
+
+/**
+ * RENDERER
+ */
+
+/**
+ * draw: renders a frame to the canvas
+ * @param i {number} - the 'interpolation percentage' is the amount of time that
+ * has yet to be simulated this frame as a percentage of the simulation step
+ */
+function draw(i: number): void {
+  bufferContext.fillStyle = '#888';
   bufferContext.fillRect(0, 0, stageWidth, stageHeight);
 
-  bufferContext.strokeStyle = '#fff';
+  bufferContext.strokeStyle = '#eff';
+  bufferContext.beginPath();
+  bufferContext.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+  bufferContext.closePath();
+  bufferContext.stroke();
 
-  let keyY = 5;
-  rows.forEach((row, i) => {
-    let keyX = 5;
-    let keyHeight = i === 0 ? (keySize - 12) / 2 : keySize - 12;
+  puppet.constraints
+    .filter((c): c is DistanceConstraint => {
+      return c instanceof DistanceConstraint;
+    })
+    .forEach(({ a, b }) => {
+      bufferContext.save();
 
-    row.forEach((col, j) => {
-      bufferContext.fillStyle = col === KeyCode.None ? '#aaa' : '#fff';
+      bufferContext.strokeStyle = '#777';
+      bufferContext.beginPath();
+      bufferContext.moveTo(a.currPos.x, a.currPos.y);
+      bufferContext.lineTo(b.currPos.x, b.currPos.y);
+      bufferContext.closePath();
+      bufferContext.stroke();
 
-      let keyWidth;
-      switch (col) {
-        case KeyCode.None:
-          keyWidth = keySize - 10;
-          break;
-        case KeyCode.Backspace:
-        case KeyCode.Tab:
-          keyWidth = keySize + 14;
-          break;
-        case KeyCode.CapsLock:
-        case KeyCode.Enter:
-          keyWidth = keySize + 30;
-          break;
-        case KeyCode.ShiftLeft:
-        case KeyCode.ShiftRight:
-          keyWidth = keySize + 60;
-          break;
-        case KeyCode.Space:
-          keyWidth = keySize + 248;
-          break;
-        default:
-          keyWidth = keySize - 12;
-          break;
-      }
-
-      if (
-        col === KeyCode.ArrowLeft ||
-        col === KeyCode.ArrowUp ||
-        col === KeyCode.ArrowRight ||
-        col === KeyCode.ArrowDown
-      ) {
-        keyHeight = (keySize - 12) / 2;
-        keyY = (keySize - 10) * rows.length - 8;
-
-        if (col === KeyCode.ArrowUp) {
-          keyY -= keyHeight;
-        }
-
-        if (col === KeyCode.ArrowDown) {
-          keyX -= (keyWidth + 10) * 2;
-        }
-      }
-
-      keyboard.keysDown[col] || col === KeyCode.None
-        ? bufferContext.fillRect(keyX, keyY, keyWidth, keyHeight)
-        : bufferContext.strokeRect(keyX, keyY, keyWidth, keyHeight);
-
-      keyX += keyWidth + 10;
+      bufferContext.restore();
     });
-    keyY += keyHeight + 10;
+
+  puppet.particles.forEach(p => {
+    bufferContext.save();
+
+    bufferContext.translate(p.currPos.x, p.currPos.y);
+    bufferContext.strokeStyle = '#222';
+    bufferContext.beginPath();
+    bufferContext.arc(0, 0, 5, 0, ππ);
+    bufferContext.closePath();
+    bufferContext.stroke();
+
+    bufferContext.restore();
   });
 
   canvasContext.drawImage(buffer, 0, 0);
 }
 
-function tick(): void {
-  rAF(tick);
-  draw();
+/**
+ * GAME
+ */
+const step = 1000 / 60;
+let excess = 0;
+
+let frameId = -1;
+
+// resets everytime you click 'play'
+let firstTime = 0;
+let previousTime = 0;
+
+// calculated each frame, relative to first/previous frame (respectively)
+let normalTime = 0;
+let deltaTime = 0;
+
+function tick(time: number): void {
+  frameId = rAF(tick);
+
+  normalTime = time - firstTime;
+  deltaTime = normalTime - previousTime;
+
+  previousTime = normalTime;
+  excess += deltaTime;
+
+  excess = min(excess, 1000);
+  while (excess >= step) {
+    update(normalTime, step);
+    excess -= step;
+  }
+
+  draw(excess / step);
 }
 
-tick();
+function play(): void {
+  frameId = rAF((time: number) => {
+    firstTime = time;
+    previousTime = 0;
+    excess = 0;
+
+    frameId = rAF(tick);
+  });
+}
+
+function stop(): void {
+  cAF(frameId);
+  frameId = -1;
+}
+
+play();
+
+document.addEventListener('keydown', play);
