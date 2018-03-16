@@ -1,4 +1,4 @@
-import { atan2, cos, hypot, sin, π } from '../math';
+import { acos, atan2, cos, hypot, sin, π } from '../math';
 
 export default class Vec2 {
   public static get one() {
@@ -42,11 +42,30 @@ export default class Vec2 {
     return v.ρ > l ? Vec2.scale(Vec2.normalize(v), l) : Vec2.clone(v);
   }
 
+  public static angleBetween(vertex: Vec2, a: Vec2, b: Vec2): number {
+    // const numerator = a.ρ2 + b.ρ2 - vertex.ρ2;
+    // const denomenator = 2 * a.ρ * b.ρ;
+    // return acos(numerator / denomenator);
+
+    const l = sub(vertex, a);
+    const r = sub(vertex, b);
+    return atan2(l.x * r.y - l.y * r.x, l.x * r.x + l.y * r.y);
+  }
+
+  public static rotate(v: Vec2, o: Vec2, θ: number): Vec2 {
+    const d = sub(v, o);
+    return new Vec2(d.x * cos(θ) - d.y * sin(θ) + o.x, d.x * sin(θ) + d.y * cos(θ) + o.y);
+  }
+
   public static fromPolar(θ = 0, ρ = 0): Vec2 {
     return new Vec2(cos(θ) * ρ, sin(θ) * ρ);
   }
 
   public constructor(public x = 0, public y = 0) {}
+
+  public get ρ2() {
+    return this.x * this.x + this.y * this.y;
+  }
 
   public get ρ() {
     return hypot(this.x, this.y);
@@ -67,4 +86,15 @@ export default class Vec2 {
   // }
 }
 
-export const { add, clone, fromPolar, lerp, limit, normalize, scale, sub } = Vec2;
+export const {
+  add,
+  angleBetween,
+  clone,
+  fromPolar,
+  lerp,
+  limit,
+  normalize,
+  rotate,
+  scale,
+  sub,
+} = Vec2;

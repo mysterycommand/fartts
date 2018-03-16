@@ -1,8 +1,9 @@
 import './style.scss';
 
 import constantForceBehaviorFactory from './lib/behaviors/constant-force-behavior';
-import BoundsConstraint from './lib/contraints/bounds-constraint';
-import DistanceConstraint from './lib/contraints/distance-constraint';
+import AngularConstraint from './lib/constraints/angular-constraint';
+import BoundsConstraint from './lib/constraints/bounds-constraint';
+import DistanceConstraint from './lib/constraints/distance-constraint';
 import Rect from './lib/geom/rect';
 import Vec2, { add, fromPolar } from './lib/geom/vec2';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
@@ -55,10 +56,10 @@ const rHip = new Particle(add(origin, fromPolar(π * 0.75, torsoRadius)), undefi
 ]);
 const torso = new Particle(origin, undefined, [gravityBehavior]);
 
-const rElbow = new Particle(add(rShoulder.currPos, fromPolar(π * 0.75, armLength)), undefined, [
+const rElbow = new Particle(add(rShoulder.currPos, fromPolar(π * 0.65, armLength)), undefined, [
   gravityBehavior,
 ]);
-const rWrist = new Particle(add(rElbow.currPos, fromPolar(π * 0.75, armLength)), undefined, [
+const rWrist = new Particle(add(rElbow.currPos, fromPolar(π * 0.65, armLength)), undefined, [
   gravityBehavior,
 ]);
 const rKnee = new Particle(add(rHip.currPos, fromPolar(π * 0.55, legLength)), undefined, [
@@ -67,10 +68,11 @@ const rKnee = new Particle(add(rHip.currPos, fromPolar(π * 0.55, legLength)), u
 const rAnkle = new Particle(add(rKnee.currPos, fromPolar(π * 0.55, legLength)), undefined, [
   gravityBehavior,
 ]);
-const lElbow = new Particle(add(lShoulder.currPos, fromPolar(π * 0.25, armLength)), undefined, [
+
+const lElbow = new Particle(add(lShoulder.currPos, fromPolar(π * 0.35, armLength)), undefined, [
   gravityBehavior,
 ]);
-const lWrist = new Particle(add(lElbow.currPos, fromPolar(π * 0.25, armLength)), undefined, [
+const lWrist = new Particle(add(lElbow.currPos, fromPolar(π * 0.35, armLength)), undefined, [
   gravityBehavior,
 ]);
 const lKnee = new Particle(add(lHip.currPos, fromPolar(π * 0.45, legLength)), undefined, [
@@ -120,6 +122,16 @@ const puppetConstraints = [
   new DistanceConstraint(rKnee, rAnkle),
   new DistanceConstraint(lHip, lKnee),
   new DistanceConstraint(lKnee, lAnkle),
+
+  new AngularConstraint(rWrist, rElbow, rShoulder, 0.1),
+  new AngularConstraint(lWrist, lElbow, lShoulder, 0.1),
+  new AngularConstraint(rElbow, rShoulder, rHip, 0.1),
+  new AngularConstraint(lElbow, lShoulder, lHip, 0.1),
+
+  new AngularConstraint(rAnkle, rKnee, rHip),
+  new AngularConstraint(lAnkle, lKnee, lHip),
+  new AngularConstraint(rKnee, rHip, rShoulder),
+  new AngularConstraint(lKnee, lHip, lShoulder),
 
   new BoundsConstraint(puppetParticles, bounds),
 ];

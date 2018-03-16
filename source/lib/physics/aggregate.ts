@@ -1,4 +1,4 @@
-import { IConstraint } from '../contraints';
+import { IConstraint } from '../constraints';
 import Vec2 from '../geom/vec2';
 import Particle from './particle';
 
