@@ -6,7 +6,7 @@ export default class DistanceConstraint implements IConstraint {
   public constructor(
     public a: Particle,
     public b: Particle,
-    public stiffness: number = 0.5,
+    public stiffness: number = 5,
     public distance: number = sub(a.currPos, b.currPos).ρ,
   ) {}
 
@@ -20,7 +20,7 @@ export default class DistanceConstraint implements IConstraint {
     this.a.currPos.x += s.x;
     this.a.currPos.y += s.y;
 
-    this.b.currPos.x += s.x;
-    this.b.currPos.y += s.y;
+    this.b.currPos.x -= s.x;
+    this.b.currPos.y -= s.y;
   }
 }
