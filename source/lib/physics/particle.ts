@@ -5,28 +5,28 @@ type Behavior = (p: Particle, t: number, dt: number) => Vec2;
 export default class Particle {
   public behaviors: Behavior[] = [];
 
-  public constructor(public cpos = Vec2.zero, public ppos = clone(cpos)) {}
+  public constructor(public currPos = Vec2.zero, public prevPos = clone(currPos)) {}
 
-  public get cvel(): Vec2 {
-    return sub(this.cpos, this.ppos);
+  public get currVel(): Vec2 {
+    return sub(this.currPos, this.prevPos);
   }
 
   public ipos(i: number): Vec2 {
-    return lerp(this.cpos, this.ppos, i);
+    return lerp(this.currPos, this.prevPos, i);
   }
 
   public update(t: number, dt: number): void {
-    const { cpos } = this;
-    const nvel = limit(this.nvel(t, dt), 3);
+    const { currPos } = this;
+    const nextVel = limit(this.nextVel(t, dt), 3);
 
-    this.ppos = clone(cpos);
-    this.cpos = add(cpos, nvel);
+    this.prevPos = clone(currPos);
+    this.currPos = add(currPos, nextVel);
 
     // constraints: distance, bounds, etc...
   }
 
-  private nvel(t: number, dt: number): Vec2 {
-    const { behaviors, cvel } = this;
-    return behaviors.reduce((v, b) => add(v, b(this, t, dt)), cvel);
+  private nextVel(t: number, dt: number): Vec2 {
+    const { behaviors, currVel } = this;
+    return behaviors.reduce((v, b) => add(v, b(this, t, dt)), currVel);
   }
 }
