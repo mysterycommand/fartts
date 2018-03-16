@@ -40,7 +40,7 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 
 // TODO: factor this out into a drag behavior
 // const d = 0.01;
-// const drag = (p: Particle) => scale(lerp(p.cvel, Vec2.zero, d), -1);
+// const drag = (p: Particle) => scale(lerp(p.currVel, Vec2.zero, d), -1);
 
 const speed = 3 / stageScale;
 const force = 0.025 / stageScale;
@@ -50,7 +50,7 @@ function getSeparate(ps: Particle[], dist: number = 60 / stageScale): (p: Partic
     let j = 0;
 
     let w = ps.reduce((v, q) => {
-      const d = sub(p.cpos, q.cpos);
+      const d = sub(p.currPos, q.currPos);
 
       if (d.ρ > 0 && d.ρ < dist) {
         ++j;
@@ -65,7 +65,7 @@ function getSeparate(ps: Particle[], dist: number = 60 / stageScale): (p: Partic
     }
 
     if (w.ρ > 0) {
-      return scale(limit(sub(scale(normalize(w), speed), p.cvel), force), 1.5);
+      return scale(limit(sub(scale(normalize(w), speed), p.currVel), force), 1.5);
     }
 
     return w;
@@ -77,11 +77,11 @@ function getAlign(ps: Particle[], dist: number = 100 / stageScale): (p: Particle
     let j = 0;
 
     let w = ps.reduce((v, q) => {
-      const d = sub(p.cpos, q.cpos);
+      const d = sub(p.currPos, q.currPos);
 
       if (d.ρ > 0 && d.ρ < dist) {
         ++j;
-        return add(v, q.cvel);
+        return add(v, q.currVel);
       }
 
       return v;
@@ -89,7 +89,7 @@ function getAlign(ps: Particle[], dist: number = 100 / stageScale): (p: Particle
 
     if (j > 0) {
       w = scale(w, 1 / j);
-      return limit(sub(scale(normalize(w), speed), p.cvel), force);
+      return limit(sub(scale(normalize(w), speed), p.currVel), force);
     }
 
     return Vec2.zero;
@@ -101,11 +101,11 @@ function getCohere(ps: Particle[], dist: number = 100 / stageScale): (p: Particl
     let j = 0;
 
     let w = ps.reduce((v, q) => {
-      const d = sub(p.cpos, q.cpos);
+      const d = sub(p.currPos, q.currPos);
 
       if (d.ρ > 0 && d.ρ < dist) {
         ++j;
-        return add(v, q.cpos);
+        return add(v, q.currPos);
       }
 
       return v;
@@ -113,7 +113,7 @@ function getCohere(ps: Particle[], dist: number = 100 / stageScale): (p: Particl
 
     if (j > 0) {
       w = scale(w, 1 / j);
-      return limit(sub(scale(normalize(sub(w, p.cpos)), speed), p.cvel), force);
+      return limit(sub(scale(normalize(sub(w, p.currPos)), speed), p.currVel), force);
     }
 
     return Vec2.zero;
@@ -134,10 +134,10 @@ function init() {
   // const initY = stageHeight * 0.2 + random() * stageHeight * 0.6;
 
   for (let i = 0; i < numParticles; ++i) {
-    const cpos = add(origin, fromPolar(i / numParticles * ππ, random() * 100));
-    const ppos = add(cpos, fromPolar(random() * ππ, 1));
+    const currPos = add(origin, fromPolar(i / numParticles * ππ, random() * 100));
+    const prevPos = add(currPos, fromPolar(random() * ππ, 1));
 
-    const particle = new Particle(cpos, ppos);
+    const particle = new Particle(currPos, prevPos);
     particles.push(particle);
 
     // particle.behaviors.push(gravity);
@@ -163,36 +163,36 @@ function update(t: number, dt: number): void {
     // console.log(t); // tslint:disable-line
     particle.update(t, dt);
 
-    const { cpos: { x, y }, cvel } = particle;
+    const { currPos: { x, y }, currVel } = particle;
     let move = Vec2.zero;
 
     if (y < 0 - (128 - 96) / rs) {
       move = new Vec2(0, stageHeight + 128 / rs);
-      particle.ppos = add(particle.ppos, move);
-      particle.cpos = add(particle.cpos, move);
+      particle.prevPos = add(particle.prevPos, move);
+      particle.currPos = add(particle.currPos, move);
     }
 
     if (x < -64 / rs) {
       move = new Vec2(stageWidth + 128 / rs, 0);
-      particle.ppos = add(particle.ppos, move);
-      particle.cpos = add(particle.cpos, move);
+      particle.prevPos = add(particle.prevPos, move);
+      particle.currPos = add(particle.currPos, move);
     }
 
     if (x > stageWidth + 64 / rs) {
       move = new Vec2(stageWidth + 128 / rs, 0);
-      particle.ppos = sub(particle.ppos, move);
-      particle.cpos = sub(particle.cpos, move);
+      particle.prevPos = sub(particle.prevPos, move);
+      particle.currPos = sub(particle.currPos, move);
     }
 
     if (y > stageHeight + 96 / rs) {
       move = new Vec2(0, stageHeight + 128 / rs);
-      particle.ppos = sub(particle.ppos, move);
-      particle.cpos = sub(particle.cpos, move);
+      particle.prevPos = sub(particle.prevPos, move);
+      particle.currPos = sub(particle.currPos, move);
     }
   });
 
-  // particles = particles.filter(({ cpos: { y } }) => y < stageHeight);
-  // particles = particles.filter(({ cpos: { x, y } }) => {
+  // particles = particles.filter(({ currPos: { y } }) => y < stageHeight);
+  // particles = particles.filter(({ currPos: { x, y } }) => {
   //   const top = 0 < y;
   //   const right = x < stageWidth;
   //   const bottom = y < stageHeight;
@@ -220,7 +220,7 @@ function draw(i: number): void {
       return a.ipos(i).y - b.ipos(i).y;
     })
     .some(particle => {
-      const { cvel: { θ, ρ } } = particle;
+      const { currVel: { θ, ρ } } = particle;
       const { x, y } = particle.ipos(i);
       const frame = floor(((round(toDegrees(θ + π)) + 22.5) % 360) / 45);
 
