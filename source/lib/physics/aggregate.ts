@@ -7,6 +7,8 @@ export default class Aggregate {
 
   public update(t: number, dt: number): void {
     this.particles.forEach(p => p.update(t, dt));
-    this.constraints.forEach(c => c.update(t, dt));
+    for (let i = 0; i < 10; ++i) {
+      this.constraints.forEach(c => c.update(t, dt));
+    }
   }
 }
