@@ -3,9 +3,11 @@ import Vec2, { add, clone, lerp, limit, sub } from '../geom/vec2';
 type Behavior = (p: Particle, t: number, dt: number) => Vec2;
 
 export default class Particle {
-  public behaviors: Behavior[] = [];
-
-  public constructor(public currPos = Vec2.zero, public prevPos = clone(currPos)) {}
+  public constructor(
+    public currPos = Vec2.zero,
+    public prevPos = clone(currPos),
+    public behaviors: Behavior[] = [],
+  ) {}
 
   public get currVel(): Vec2 {
     return sub(this.currPos, this.prevPos);
@@ -21,8 +23,6 @@ export default class Particle {
 
     this.prevPos = clone(currPos);
     this.currPos = add(currPos, nextVel);
-
-    // constraints: distance, bounds, etc...
   }
 
   private nextVel(t: number, dt: number): Vec2 {

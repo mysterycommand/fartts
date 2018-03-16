@@ -1,6 +1,10 @@
 import './style.scss';
 
+import DistanceConstraint from './lib/contraints/distance-constraint';
+import Vec2 from './lib/geom/vec2';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
+import Aggregate from './lib/physics/aggregate';
+import Particle from './lib/physics/particle';
 
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
