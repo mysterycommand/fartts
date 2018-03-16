@@ -1,3 +1,3 @@
-export default interface IConstraint {
-  relax(stepCoef: number): void;
-};
+export interface IConstraint {
+  update(t: number, dt: number): void;
+}

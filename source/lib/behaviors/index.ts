@@ -1,3 +1,4 @@
+import Vec2 from '../geom/vec2';
 import Particle from '../physics/particle';
 
-export type TBehavior = (p: Particle, t: number, dt: number) => void;
+export type Behavior = (p: Particle, t: number, dt: number) => Vec2;

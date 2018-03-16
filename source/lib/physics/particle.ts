@@ -1,6 +1,5 @@
+import { Behavior } from '../behaviors';
 import Vec2, { add, clone, lerp, limit, sub } from '../geom/vec2';
-
-type Behavior = (p: Particle, t: number, dt: number) => Vec2;
 
 export default class Particle {
   public constructor(

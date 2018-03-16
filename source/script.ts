@@ -1,7 +1,10 @@
 import './style.scss';
 
+import constantForceBehaviorFactory from './lib/behaviors/constant-force-behavior';
+import BoundsConstraint from './lib/contraints/bounds-constraint';
 import DistanceConstraint from './lib/contraints/distance-constraint';
-import Vec2 from './lib/geom/vec2';
+import Rect from './lib/geom/rect';
+import Vec2, { add, fromPolar } from './lib/geom/vec2';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
 import Aggregate from './lib/physics/aggregate';
 import Particle from './lib/physics/particle';
@@ -28,6 +31,103 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
  * SIMULATION
  */
 
+const gravity = new Vec2(0, 0.2);
+const gravityBehavior = constantForceBehaviorFactory(gravity);
+
+const bounds = new Rect(new Vec2(10, 10), new Vec2(stageWidth - 10, stageHeight - 10));
+
+const origin = new Vec2(stageCenterX, stageCenterY);
+const torsoRadius = 50;
+const armLength = 65;
+const legLength = 50;
+
+const rShoulder = new Particle(add(origin, fromPolar(π * 1.25, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const rElbow = new Particle(add(rShoulder.currPos, fromPolar(π * 0.75, armLength)), undefined, [
+  gravityBehavior,
+]);
+const rWrist = new Particle(add(rElbow.currPos, fromPolar(π * 0.75, armLength)), undefined, [
+  gravityBehavior,
+]);
+
+const rHip = new Particle(add(origin, fromPolar(π * 0.75, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const rKnee = new Particle(add(rHip.currPos, fromPolar(π * 0.5, legLength)), undefined, [
+  gravityBehavior,
+]);
+const rAnkle = new Particle(add(rKnee.currPos, fromPolar(π * 0.5, legLength)), undefined, [
+  gravityBehavior,
+]);
+
+const torso = new Particle(origin, undefined, [gravityBehavior]);
+
+const lShoulder = new Particle(add(origin, fromPolar(π * 1.75, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const lElbow = new Particle(add(lShoulder.currPos, fromPolar(π * 0.25, armLength)), undefined, [
+  gravityBehavior,
+]);
+const lWrist = new Particle(add(lElbow.currPos, fromPolar(π * 0.25, armLength)), undefined, [
+  gravityBehavior,
+]);
+
+const lHip = new Particle(add(origin, fromPolar(π * 0.25, torsoRadius)), undefined, [
+  gravityBehavior,
+]);
+const lKnee = new Particle(add(lHip.currPos, fromPolar(π * 0.5, legLength)), undefined, [
+  gravityBehavior,
+]);
+const lAnkle = new Particle(add(lKnee.currPos, fromPolar(π * 0.5, legLength)), undefined, [
+  gravityBehavior,
+]);
+
+const puppetParticles = [
+  rWrist,
+  rElbow,
+  rShoulder,
+  rAnkle,
+  rKnee,
+  rHip,
+  torso,
+  lWrist,
+  lElbow,
+  lShoulder,
+  lAnkle,
+  lKnee,
+  lHip,
+];
+
+const puppetConstraints = [
+  new DistanceConstraint(torso, rShoulder),
+  new DistanceConstraint(torso, lShoulder),
+  new DistanceConstraint(torso, rHip),
+  new DistanceConstraint(torso, lHip),
+
+  new DistanceConstraint(rShoulder, lHip),
+  new DistanceConstraint(lShoulder, rHip),
+
+  new DistanceConstraint(rShoulder, lShoulder),
+  new DistanceConstraint(lShoulder, lHip),
+  new DistanceConstraint(lHip, rHip),
+  new DistanceConstraint(rHip, rShoulder),
+
+  new DistanceConstraint(rShoulder, rElbow),
+  new DistanceConstraint(rElbow, rWrist),
+  new DistanceConstraint(lShoulder, lElbow),
+  new DistanceConstraint(lElbow, lWrist),
+
+  new DistanceConstraint(rHip, rKnee),
+  new DistanceConstraint(rKnee, rAnkle),
+  new DistanceConstraint(lHip, lKnee),
+  new DistanceConstraint(lKnee, lAnkle),
+
+  new BoundsConstraint(puppetParticles, bounds),
+];
+
+const puppet = new Aggregate(puppetParticles, puppetConstraints);
+
 /**
  * update: updates the simulation
  * @param t {number} - the number of miliseconds that have ellapsed since start
@@ -35,6 +135,7 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
  */
 function update(t: number, dt: number): void {
   // do stuff with particles/bodies here
+  puppet.update(t, dt);
 }
 
 /**
@@ -47,10 +148,44 @@ function update(t: number, dt: number): void {
  * has yet to be simulated this frame as a percentage of the simulation step
  */
 function draw(i: number): void {
-  bufferContext.fillStyle = '#666';
+  bufferContext.fillStyle = '#888';
   bufferContext.fillRect(0, 0, stageWidth, stageHeight);
 
-  // draw stuff into bufferContext here
+  bufferContext.strokeStyle = '#eff';
+  bufferContext.beginPath();
+  bufferContext.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+  bufferContext.closePath();
+  bufferContext.stroke();
+
+  puppet.constraints
+    .filter((c): c is DistanceConstraint => {
+      return c instanceof DistanceConstraint;
+    })
+    .forEach(({ a, b }) => {
+      bufferContext.save();
+
+      bufferContext.strokeStyle = '#777';
+      bufferContext.beginPath();
+      bufferContext.moveTo(a.currPos.x, a.currPos.y);
+      bufferContext.lineTo(b.currPos.x, b.currPos.y);
+      bufferContext.closePath();
+      bufferContext.stroke();
+
+      bufferContext.restore();
+    });
+
+  puppet.particles.forEach(p => {
+    bufferContext.save();
+
+    bufferContext.translate(p.currPos.x, p.currPos.y);
+    bufferContext.strokeStyle = '#222';
+    bufferContext.beginPath();
+    bufferContext.arc(0, 0, 5, 0, ππ);
+    bufferContext.closePath();
+    bufferContext.stroke();
+
+    bufferContext.restore();
+  });
 
   canvasContext.drawImage(buffer, 0, 0);
 }
@@ -103,3 +238,5 @@ function stop(): void {
   cAF(frameId);
   frameId = -1;
 }
+
+play();
