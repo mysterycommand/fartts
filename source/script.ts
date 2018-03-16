@@ -5,6 +5,7 @@ import BoundsConstraint from './lib/contraints/bounds-constraint';
 import DistanceConstraint from './lib/contraints/distance-constraint';
 import Rect from './lib/geom/rect';
 import Vec2, { add, fromPolar } from './lib/geom/vec2';
+import Keyboard, { KeyCode } from './lib/input/keyboard';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
 import Aggregate from './lib/physics/aggregate';
 import Particle from './lib/physics/particle';
@@ -193,6 +194,8 @@ function draw(i: number): void {
 /**
  * GAME
  */
+const keyboard = new Keyboard(document);
+
 const step = 1000 / 60;
 let excess = 0;
 
@@ -206,8 +209,12 @@ let previousTime = 0;
 let normalTime = 0;
 let deltaTime = 0;
 
+function noop(time: number): void {
+  frameId = rAF(keyboard.keysDown[KeyCode.Space] ? tick : noop);
+}
+
 function tick(time: number): void {
-  frameId = rAF(tick);
+  frameId = rAF(keyboard.keysDown[KeyCode.Space] ? tick : noop);
 
   normalTime = time - firstTime;
   deltaTime = normalTime - previousTime;
