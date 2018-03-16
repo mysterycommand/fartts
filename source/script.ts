@@ -7,9 +7,13 @@ import AngularConstraint from './lib/constraints/angular-constraint';
 import BoundsConstraint from './lib/constraints/bounds-constraint';
 import DistanceConstraint from './lib/constraints/distance-constraint';
 
+import Mouse from './lib/input/mouse';
+
 import Rect from './lib/geom/rect';
-import Vec2, { add, fromPolar } from './lib/geom/vec2';
+import Vec2, { add, angleBetween, fromPolar } from './lib/geom/vec2';
+
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
+
 import Aggregate from './lib/physics/aggregate';
 import Particle from './lib/physics/particle';
 
@@ -34,6 +38,8 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 /**
  * SIMULATION
  */
+
+const mouse = new Mouse(document);
 
 const gravity = new Vec2(0, 0.2);
 const gravityBehavior = new ConstantForceBehavior(gravity);
@@ -202,13 +208,43 @@ function draw(i: number): void {
       bufferContext.restore();
     });
 
+  puppet.constraints
+    .filter((c): c is AngularConstraint => {
+      return c instanceof AngularConstraint;
+    })
+    .forEach(({ a, b, c, restAngle }) => {
+      bufferContext.save();
+
+      let startAngle = restAngle;
+      if (startAngle <= -π) {
+        startAngle += ππ;
+      } else if (startAngle >= π) {
+        startAngle -= ππ;
+      }
+
+      let endAngle = angleBetween(b.currPos, a.currPos, c.currPos);
+      if (endAngle <= -π) {
+        endAngle += ππ;
+      } else if (endAngle >= π) {
+        endAngle -= ππ;
+      }
+
+      bufferContext.strokeStyle = '#fff';
+      bufferContext.beginPath();
+      bufferContext.arc(b.currPos.x, b.currPos.y, 5, startAngle, endAngle);
+      bufferContext.closePath();
+      bufferContext.stroke();
+
+      bufferContext.restore();
+    });
+
   puppet.particles.forEach(p => {
     bufferContext.save();
 
     bufferContext.translate(p.currPos.x, p.currPos.y);
     bufferContext.strokeStyle = '#222';
     bufferContext.beginPath();
-    bufferContext.arc(0, 0, 5, 0, ππ);
+    // bufferContext.arc(0, 0, 5, 0, ππ);
     bufferContext.closePath();
     bufferContext.stroke();
 

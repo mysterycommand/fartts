@@ -13,10 +13,12 @@ export default class DistanceConstraint implements IConstraint {
   public update(t: number, dt: number): void {
     const stepCoef = 1 / dt;
 
+    // @todo: why do I need stiffness and stepCoef here?
+    // @see: advanced-character-physics.pdf (p. 6)
     const delta = sub(this.a.currPos, this.b.currPos);
-    const length = delta.ρ + Number.EPSILON; // avoids division by 0
-    const restitution = (this.restLength - length) / length * this.stiffness * stepCoef;
-    const adjustment = scale(delta, restitution);
+    const deltaLength = delta.ρ + Number.EPSILON; // avoids division by 0
+    const diff = (this.restLength - deltaLength) / deltaLength * this.stiffness * stepCoef;
+    const adjustment = scale(delta, diff);
 
     this.a.currPos.x += adjustment.x;
     this.a.currPos.y += adjustment.y;
