@@ -1,6 +1,8 @@
 import './style.scss';
 
-import constantForceBehaviorFactory from './lib/behaviors/constant-force-behavior';
+import createConstantForce from './lib/behaviors/create-constant-force';
+import createDrag from './lib/behaviors/create-drag';
+
 import AngularConstraint from './lib/constraints/angular-constraint';
 import BoundsConstraint from './lib/constraints/bounds-constraint';
 import DistanceConstraint from './lib/constraints/distance-constraint';
@@ -32,8 +34,11 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
  * SIMULATION
  */
 
-const gravity = new Vec2(0, 0.2);
-const gravityBehavior = constantForceBehaviorFactory(gravity);
+const gravity = new Vec2(0, 0);
+const gravityBehavior = createConstantForce(gravity);
+
+const drag = 0.01;
+const dragBehavior = createDrag(drag);
 
 const bounds = new Rect(new Vec2(10, 10), new Vec2(stageWidth - 10, stageHeight - 10));
 
@@ -44,42 +49,54 @@ const legLength = 50;
 
 const rShoulder = new Particle(add(origin, fromPolar(π * 1.25, torsoRadius)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const lShoulder = new Particle(add(origin, fromPolar(π * 1.75, torsoRadius)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const lHip = new Particle(add(origin, fromPolar(π * 0.25, torsoRadius)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const rHip = new Particle(add(origin, fromPolar(π * 0.75, torsoRadius)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
-const torso = new Particle(origin, undefined, [gravityBehavior]);
+const torso = new Particle(origin, undefined, [gravityBehavior, dragBehavior]);
 
 const rElbow = new Particle(add(rShoulder.currPos, fromPolar(π * 0.65, armLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const rWrist = new Particle(add(rElbow.currPos, fromPolar(π * 0.65, armLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const rKnee = new Particle(add(rHip.currPos, fromPolar(π * 0.55, legLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const rAnkle = new Particle(add(rKnee.currPos, fromPolar(π * 0.55, legLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 
 const lElbow = new Particle(add(lShoulder.currPos, fromPolar(π * 0.35, armLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const lWrist = new Particle(add(lElbow.currPos, fromPolar(π * 0.35, armLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const lKnee = new Particle(add(lHip.currPos, fromPolar(π * 0.45, legLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 const lAnkle = new Particle(add(lKnee.currPos, fromPolar(π * 0.45, legLength)), undefined, [
   gravityBehavior,
+  dragBehavior,
 ]);
 
 const puppetParticles = [
