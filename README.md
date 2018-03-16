@@ -4,3 +4,11 @@
 
 > Functional Art(-making) TypeScript<br/>
 > by [Matt Hayes](https://github.com/mysterycommand)
+
+#### Credits
+
+[Reuben Brenner-Adams](reubenbrenneradams@gmail.com)
+
+* [reubenbrenneradams.com](http://reubenbrenneradams.com)
+* [@kangareuben12](https://twitter.com/kangareuben12)
+* Sound effects

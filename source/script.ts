@@ -1,11 +1,12 @@
 import './style.scss';
 
-import createConstantForce from './lib/behaviors/create-constant-force';
-import createDrag from './lib/behaviors/create-drag';
+import ConstantForceBehavior from './lib/behaviors/constant-force-behavior';
+import DragBehavior from './lib/behaviors/drag-behavior';
 
 import AngularConstraint from './lib/constraints/angular-constraint';
 import BoundsConstraint from './lib/constraints/bounds-constraint';
 import DistanceConstraint from './lib/constraints/distance-constraint';
+
 import Rect from './lib/geom/rect';
 import Vec2, { add, fromPolar } from './lib/geom/vec2';
 import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
@@ -34,11 +35,11 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
  * SIMULATION
  */
 
-const gravity = new Vec2(0, 0);
-const gravityBehavior = createConstantForce(gravity);
+const gravity = new Vec2(0, 0.2);
+const gravityBehavior = new ConstantForceBehavior(gravity);
 
 const drag = 0.01;
-const dragBehavior = createDrag(drag);
+const dragBehavior = new DragBehavior(drag);
 
 const bounds = new Rect(new Vec2(10, 10), new Vec2(stageWidth - 10, stageHeight - 10));
 
