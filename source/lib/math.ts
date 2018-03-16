@@ -1,7 +1,7 @@
 import seedRandom from 'seedrandom';
 
 export const random = seedRandom('fart.ts');
-export const { acos, atan2, cos, floor, hypot, max, min, PI: π, round, sin, sqrt } = Math;
+export const { abs, acos, atan2, cos, floor, hypot, max, min, PI: π, round, sin, sqrt } = Math;
 export const ππ = π * 2;
 
 export function randomBool(): boolean {
