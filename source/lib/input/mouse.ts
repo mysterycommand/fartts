@@ -41,13 +41,13 @@ export default class Mouse {
 
   public wheel: Vec2 = new Vec2();
 
-  constructor(private context: EventTarget) {
+  constructor(private eventTarget: EventTarget) {
     Object.values(MouseEventType).forEach(type => {
-      context.addEventListener(type, this.onMouse);
+      eventTarget.addEventListener(type, this.onMouse);
     });
 
     Object.values(WheelEventType).forEach(type => {
-      context.addEventListener(type, this.onWheel);
+      eventTarget.addEventListener(type, this.onWheel);
     });
   }
 
