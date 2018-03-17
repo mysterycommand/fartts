@@ -23,6 +23,8 @@ import {
 import { puppetConstraints, puppetParticles } from './game/puppet';
 import { bounds } from './game/puppet/config';
 
+const phases = new Image();
+
 /**
  * SIMULATION
  */
@@ -140,6 +142,7 @@ function stop(): void {
   frameId = -1;
 }
 
-play();
-
-document.addEventListener('keydown', play);
+phases.addEventListener('load', () => {
+  play();
+});
+phases.src = './images/moon-phases-small.png';

@@ -47,11 +47,11 @@ export const puppetConstraints = [
   new DistanceConstraint(lHip, lKnee),
   new DistanceConstraint(lKnee, lAnkle),
 
-  new AngularConstraint(rWrist, rElbow, rShoulder, 0.1),
-  new AngularConstraint(lWrist, lElbow, lShoulder, 0.1),
+  new AngularConstraint(rWrist, rElbow, rShoulder, 0.01),
+  new AngularConstraint(lWrist, lElbow, lShoulder, 0.01),
 
-  new AngularConstraint(rElbow, rShoulder, rHip, 0.1),
-  new AngularConstraint(lElbow, lShoulder, lHip, 0.1),
+  new AngularConstraint(rElbow, rShoulder, rHip, 0.01),
+  new AngularConstraint(lElbow, lShoulder, lHip, 0.01),
 
   new AngularConstraint(rAnkle, rKnee, rHip, 0.01),
   new AngularConstraint(rKnee, rHip, rShoulder, 0.01),

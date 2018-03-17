@@ -63,3 +63,6 @@ typings/
 # Parcel bundler
 .cache/
 dist/
+
+# Big art assets (.psd's, etc.)
+art/
