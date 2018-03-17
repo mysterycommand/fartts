@@ -33,9 +33,36 @@ import { lWrist, rWrist } from './game/puppet/wrists';
 import facesSrc from './images/moon-faces-small.png';
 import phasesSrc from './images/moon-phases-small.png';
 
+// import houseSmash01Src from './sounds/explosions/house-smash-01.mp3';
+// import houseSmash02Src from './sounds/explosions/house-smash-02.mp3';
+// import houseSmash03Src from './sounds/explosions/house-smash-03.mp3';
+// import houseSmash04Src from './sounds/explosions/house-smash-04.mp3';
+// import houseSmash05Src from './sounds/explosions/house-smash-05.mp3';
+// import moonstep01Src from './sounds/explosions/moonstep-01.mp3';
+// import moonstep02Src from './sounds/explosions/moonstep-02.mp3';
+// import moonstep03Src from './sounds/explosions/moonstep-03.mp3';
+// import moonstruckSrc from './sounds/music/moonstruck.mp3';
+// import step01Src from './sounds/sfx/step-01.mp3';
+// import step02Src from './sounds/sfx/step-02.mp3';
+// import step03Src from './sounds/sfx/step-03.mp3';
+// import step04Src from './sounds/sfx/step-04.mp3';
+// import step05Src from './sounds/sfx/step-05.mp3';
+// import step06Src from './sounds/sfx/step-06.mp3';
+// import step07Src from './sounds/sfx/step-07.mp3';
+// import step08Src from './sounds/sfx/step-08.mp3';
+// import step09Src from './sounds/sfx/step-09.mp3';
+// import step10Src from './sounds/sfx/step-10.mp3';
+// import step11Src from './sounds/sfx/step-11.mp3';
+// import step12Src from './sounds/sfx/step-12.mp3';
+// import step13Src from './sounds/sfx/step-13.mp3';
+// import step14Src from './sounds/sfx/step-14.mp3';
+// import step15Src from './sounds/sfx/step-15.mp3';
+
 let debug = false;
 
 const images: { [key: string]: HTMLImageElement } = {};
+const sounds: { [key: string]: HTMLAudioElement } = {};
+
 const phaseOffsetFn = getStepFn(saw, 5000, 0, 9);
 let horizontalOffset = 0;
 let verticalOffset = 0;
@@ -251,16 +278,45 @@ document.addEventListener('keyup', event => {
   debug = !debug;
 });
 
-Promise.all(
-  Object.entries({
-    faces: facesSrc,
-    phases: phasesSrc,
-  }).map(
-    ([name, src]) =>
-      new Promise(resolve => {
-        images[name] = new Image();
-        images[name].addEventListener('load', resolve);
-        images[name].src = src;
-      }),
+Promise.all([
+  // Promise.all(
+  //   Object.entries({
+  //     moonstruck: './sounds/music/moonstruck.mp3',
+  //     step01: './sounds/sfx/step-01.mp3',
+  //     step02: './sounds/sfx/step-02.mp3',
+  //     step03: './sounds/sfx/step-03.mp3',
+  //     step04: './sounds/sfx/step-04.mp3',
+  //     step05: './sounds/sfx/step-05.mp3',
+  //     step06: './sounds/sfx/step-06.mp3',
+  //     step07: './sounds/sfx/step-07.mp3',
+  //     step08: './sounds/sfx/step-08.mp3',
+  //     step09: './sounds/sfx/step-09.mp3',
+  //     step10: './sounds/sfx/step-10.mp3',
+  //     step11: './sounds/sfx/step-11.mp3',
+  //     step12: './sounds/sfx/step-12.mp3',
+  //     step13: './sounds/sfx/step-13.mp3',
+  //     step14: './sounds/sfx/step-14.mp3',
+  //     step15: './sounds/sfx/step-15.mp3',
+  //   }).map(
+  //     ([name, src]) =>
+  //       new Promise(resolve => {
+  //         sounds[name] = new Audio();
+  //         sounds[name].addEventListener('load', resolve);
+  //         sounds[name].src = url;
+  //       }),
+  //   ),
+  // ),
+  Promise.all(
+    Object.entries({
+      faces: facesSrc,
+      phases: phasesSrc,
+    }).map(
+      ([name, src]) =>
+        new Promise(resolve => {
+          images[name] = new Image();
+          images[name].addEventListener('load', resolve);
+          images[name].src = src;
+        }),
+    ),
   ),
-).then(play);
+]).then(play);
