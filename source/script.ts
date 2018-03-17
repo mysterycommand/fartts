@@ -170,7 +170,7 @@ function draw(i: number): void {
     108,
     108,
     o.x - 54,
-    o.y - 54,
+    o.y - 70,
     108,
     108,
   );
