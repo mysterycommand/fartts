@@ -3,27 +3,23 @@ import Vec2, { add, fromPolar, sub } from '../../lib/geom/vec2';
 import { π } from '../../lib/math';
 import Particle from '../../lib/physics/particle';
 import { getCosFn, getSinFn } from '../../lib/wave';
-import { armLength, commonBehaviors } from './config';
+import { commonBehaviors, forearmLength, p, wristMoveRadiusX, wristMoveRadiusY } from './config';
 import { lElbow, rElbow } from './elbows';
 
-const p = 2000;
-const wristMoveRadiusX = 20;
-const wristMoveRadiusY = 30;
+const lElbowOrigin = add(lElbow.currPos, fromPolar(π * 0.35, forearmLength));
+const lWristXFn = getSinFn(p, -1, 1, p / 5);
+const lWristYFn = getCosFn(p, -1, 1, p / 5);
 
-const lElbowOrigin = add(lElbow.currPos, fromPolar(π * 0.35, armLength));
-const lXFn = getSinFn(p, -1, 1, p / 5);
-const lYFn = getCosFn(p, -1, 1, p / 5);
-
-const rElbowOrigin = add(rElbow.currPos, fromPolar(π * 0.65, armLength));
-const rXFn = getSinFn(p, -1, 1, p / 2 + p / 5);
-const rYFn = getCosFn(p, -1, 1, p / 2 + p / 5);
+const rElbowOrigin = add(rElbow.currPos, fromPolar(π * 0.65, forearmLength));
+const rWristXFn = getSinFn(p, -1, 1, p / 2 + p / 5);
+const rWristYFn = getCosFn(p, -1, 1, p / 2 + p / 5);
 
 export const rWrist = new Particle(rElbowOrigin, undefined, [
   ...commonBehaviors,
   new PinBehavior((t: number) => {
     return add(
       sub(rElbowOrigin, new Vec2(0, wristMoveRadiusY / 2)),
-      new Vec2(lXFn(t) * wristMoveRadiusX, lYFn(t) * wristMoveRadiusY),
+      new Vec2(lWristXFn(t) * wristMoveRadiusX, lWristYFn(t) * wristMoveRadiusY),
     );
   }),
 ]);
@@ -33,7 +29,7 @@ export const lWrist = new Particle(lElbowOrigin, undefined, [
   new PinBehavior((t: number) => {
     return add(
       sub(lElbowOrigin, new Vec2(0, wristMoveRadiusY / 2)),
-      new Vec2(rXFn(t) * wristMoveRadiusX, rYFn(t) * wristMoveRadiusY),
+      new Vec2(rWristXFn(t) * wristMoveRadiusX, rWristYFn(t) * wristMoveRadiusY),
     );
   }),
 ]);

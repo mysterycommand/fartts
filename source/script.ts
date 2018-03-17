@@ -1,7 +1,7 @@
 import './style.scss';
 
 import DistanceConstraint from './lib/constraints/distance-constraint';
-import { sub } from './lib/geom/vec2';
+import { add, scale, sub } from './lib/geom/vec2';
 import Mouse from './lib/input/mouse';
 import { floor, min, random, saw, π, ππ } from './lib/math';
 import Aggregate from './lib/physics/aggregate';
@@ -146,22 +146,22 @@ function draw(i: number): void {
   ].forEach(({ from, to, img }) => {
     bufferContext.save();
     bufferContext.translate(from.currPos.x - img.width / 2, from.currPos.y);
-    bufferContext.rotate(sub(from.currPos, to.currPos).θ + π / 2);
+    let angle = sub(from.currPos, to.currPos).θ;
+    if (img === images.lFoot || img === images.rFoot) {
+      angle -= π / 2;
+    } else {
+      angle += π / 2;
+    }
+    bufferContext.rotate(angle);
     bufferContext.drawImage(img, 0, 0);
     bufferContext.restore();
   });
 
-  bufferContext.drawImage(
-    images.phases,
-    horizontalOffset * 145,
-    0,
-    108,
-    108,
-    o.x - 54,
-    o.y - 54,
-    108,
-    108,
-  );
+  const head = add(rHip.currPos, scale(sub(lShoulder.currPos, rHip.currPos), 0.5));
+
+  bufferContext.save();
+  bufferContext.translate(head.x - 54, head.y - 54);
+  bufferContext.drawImage(images.phases, horizontalOffset * 145, 0, 108, 108, 0, 0, 108, 108);
 
   bufferContext.drawImage(
     images.faces,
@@ -169,11 +169,12 @@ function draw(i: number): void {
     verticalOffset * 140,
     108,
     108,
-    o.x - 54,
-    o.y - 70,
+    0,
+    0,
     108,
     108,
   );
+  bufferContext.restore();
 
   if (debug) {
     puppet.constraints
