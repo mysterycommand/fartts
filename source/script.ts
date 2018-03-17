@@ -9,6 +9,7 @@ import AngularConstraint from './lib/constraints/angular-constraint';
 import BoundsConstraint from './lib/constraints/bounds-constraint';
 import DistanceConstraint from './lib/constraints/distance-constraint';
 import DistanceConstraintByTilt from './lib/constraints/distance-constraint-by-tilt';
+import OscillatingAngularConstraint from './lib/constraints/oscillating-angular-constraint';
 
 import Mouse from './lib/input/mouse';
 
@@ -19,6 +20,8 @@ import { abs, floor, max, min, random, round, toDegrees, π, ππ } from './lib/
 
 import Aggregate from './lib/physics/aggregate';
 import Particle from './lib/physics/particle';
+
+import { getSinFn, getCosFn } from './lib/wave';
 
 const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
 
@@ -45,32 +48,29 @@ canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = fals
 const mouse = new Mouse(document);
 const bounds = new Rect(new Vec2(10, 10), new Vec2(stageWidth - 10, stageHeight - 10));
 
-const gravity = new Vec2(0, 0.5);
+const gravity = new Vec2(0, 0.2);
 const friction = 0.1;
 const drag = 0.01;
 
 const origin = new Vec2(stageCenterX, stageCenterY);
-const torsoRadius = 50;
-const armLength = 65;
-const legLength = 50;
+const torsoRadius = 25;
+const armLength = 50;
+const legLength = 75;
 
 const commonBehaviors = [
   new ConstantForceBehavior(gravity),
   new GroundBehavior(bounds.bottom, friction),
   new DragBehavior(drag),
 ];
-const pinBehavior = new PinBehavior(() => origin);
 
-const rShoulder = new Particle(
-  add(origin, fromPolar(π * 1.25, torsoRadius)),
-  undefined,
-  commonBehaviors,
-);
-const lShoulder = new Particle(
-  add(origin, fromPolar(π * 1.75, torsoRadius)),
-  undefined,
-  commonBehaviors,
-);
+const rShoulder = new Particle(add(origin, fromPolar(π * 1.25, torsoRadius)), undefined, [
+  ...commonBehaviors,
+  new PinBehavior(() => add(origin, fromPolar(π * 1.25, torsoRadius))),
+]);
+const lShoulder = new Particle(add(origin, fromPolar(π * 1.75, torsoRadius)), undefined, [
+  ...commonBehaviors,
+  new PinBehavior(() => add(origin, fromPolar(π * 1.75, torsoRadius))),
+]);
 const lHip = new Particle(
   add(origin, fromPolar(π * 0.25, torsoRadius)),
   undefined,
@@ -96,11 +96,6 @@ const rKnee = new Particle(
   undefined,
   commonBehaviors,
 );
-const rAnkle = new Particle(
-  add(rKnee.currPos, fromPolar(π * 0.55, legLength)),
-  undefined,
-  commonBehaviors,
-);
 const lElbow = new Particle(
   add(lShoulder.currPos, fromPolar(π * 0.35, armLength)),
   undefined,
@@ -116,12 +111,38 @@ const lKnee = new Particle(
   undefined,
   commonBehaviors,
 );
-const lAnkle = new Particle(
-  add(lKnee.currPos, fromPolar(π * 0.45, legLength)),
-  undefined,
-  commonBehaviors,
-);
-const torso = new Particle(origin, undefined, [...commonBehaviors, pinBehavior]);
+
+const p = 4000;
+
+const lKneeOrigin = add(lKnee.currPos, fromPolar(π * 0.45, legLength));
+const lAnkleMoveRadius = 50;
+const lXFn = getSinFn(p);
+const lYFn = getCosFn(p);
+
+const lAnkle = new Particle(lKneeOrigin, undefined, [
+  ...commonBehaviors,
+  new PinBehavior((t: number) => {
+    return add(
+      sub(lKneeOrigin, new Vec2(0, lAnkleMoveRadius / 2)),
+      new Vec2(lXFn(t) * lAnkleMoveRadius, lYFn(t) * lAnkleMoveRadius),
+    );
+  }),
+]);
+
+const rKneeOrigin = add(rKnee.currPos, fromPolar(π * 0.55, legLength));
+const rAnkleMoveRadius = 50;
+const rXFn = getSinFn(p, -1, 1, p / 2);
+const rYFn = getCosFn(p, -1, 1, p / 2);
+
+const rAnkle = new Particle(rKneeOrigin, undefined, [
+  ...commonBehaviors,
+  new PinBehavior((t: number) => {
+    return add(
+      sub(rKneeOrigin, new Vec2(0, rAnkleMoveRadius / 2)),
+      new Vec2(rXFn(t) * rAnkleMoveRadius, rYFn(t) * rAnkleMoveRadius),
+    );
+  }),
+]);
 
 const puppetParticles = [
   rShoulder,
@@ -136,45 +157,20 @@ const puppetParticles = [
   lElbow,
   lAnkle,
   lKnee,
-  torso,
 ];
 
 const maxDist = sub(lShoulder.currPos, lHip.currPos).ρ;
 const minDist = scale(sub(lShoulder.currPos, lHip.currPos), 0.65).ρ;
 
 const puppetConstraints = [
-  new DistanceConstraint(torso, rShoulder),
-  new DistanceConstraint(torso, lShoulder),
-  new DistanceConstraint(torso, lHip),
-  new DistanceConstraint(torso, rHip),
-
   new DistanceConstraint(rShoulder, lHip),
   new DistanceConstraint(lShoulder, rHip),
 
-  new DistanceConstraintByTilt(rShoulder, lShoulder, 5, () => {
-    return (
-      minDist +
-      (maxDist - minDist) * (1 - min(max(0, abs(sub(mouse.currPos, origin).x) / stageCenterX), 1))
-    );
-  }),
-  new DistanceConstraintByTilt(lHip, rHip, 5, () => {
-    return (
-      minDist +
-      (maxDist - minDist) * (1 - min(max(0, abs(sub(mouse.currPos, origin).x) / stageCenterX), 1))
-    );
-  }),
+  new DistanceConstraint(rShoulder, lShoulder),
+  new DistanceConstraint(lHip, rHip),
 
-  new DistanceConstraintByTilt(lShoulder, lHip, 5, () => {
-    return (
-      minDist +
-      (maxDist - minDist) * (1 - min(max(0, sub(mouse.currPos, origin).x / stageCenterX), 1))
-    );
-  }),
-  new DistanceConstraintByTilt(rHip, rShoulder, 5, () => {
-    return (
-      minDist + (maxDist - minDist) * min(max(0, sub(mouse.currPos, origin).x / stageCenterX), 1)
-    );
-  }),
+  new DistanceConstraint(lShoulder, lHip),
+  new DistanceConstraint(rHip, rShoulder),
 
   new DistanceConstraint(rShoulder, rElbow),
   new DistanceConstraint(rElbow, rWrist),
@@ -191,10 +187,35 @@ const puppetConstraints = [
   new AngularConstraint(rElbow, rShoulder, rHip, 0.1),
   new AngularConstraint(lElbow, lShoulder, lHip, 0.1),
 
-  new AngularConstraint(rAnkle, rKnee, rHip),
-  new AngularConstraint(lAnkle, lKnee, lHip),
-  new AngularConstraint(rKnee, rHip, rShoulder),
-  new AngularConstraint(lKnee, lHip, lShoulder),
+  new AngularConstraint(rAnkle, rKnee, rHip, 0.01),
+  new AngularConstraint(rKnee, rHip, rShoulder, 0.01),
+
+  new AngularConstraint(lAnkle, lKnee, lHip, 0.01),
+  new AngularConstraint(lKnee, lHip, lShoulder, 0.01),
+
+  // new OscillatingAngularConstraint(
+  //   rKnee,
+  //   rHip,
+  //   rShoulder,
+  //   0.1,
+  //   getSinFn(1500, π * 1.85, π * 0.45, 750),
+  //   () => min(max(0, sub(mouse.currPos, origin).x / origin.x), 1),
+  // ),
+  // new OscillatingAngularConstraint(rAnkle, rKnee, rHip, 0.1, getSinFn(1500, π, 0, 750), () =>
+  //   min(max(0, sub(mouse.currPos, origin).x / origin.x), 1),
+  // ),
+
+  // new OscillatingAngularConstraint(
+  //   lKnee,
+  //   lHip,
+  //   lShoulder,
+  //   0.1,
+  //   getSinFn(1500, π * 1.85, π * 0.45),
+  //   () => min(max(0, sub(mouse.currPos, origin).x / origin.x), 1),
+  // ),
+  // new OscillatingAngularConstraint(lAnkle, lKnee, lHip, 0.1, getSinFn(1500, π, 0), () =>
+  //   min(max(0, sub(mouse.currPos, origin).x / origin.x), 1),
+  // ),
 
   new BoundsConstraint(puppetParticles, bounds),
 ];
@@ -250,7 +271,7 @@ function draw(i: number): void {
   puppet.particles.forEach(p => {
     bufferContext.save();
 
-    bufferContext.strokeStyle = '#222';
+    bufferContext.strokeStyle = sub(mouse.currPos, p.currPos).ρ < 20 ? '#f66' : '#222';
     bufferContext.beginPath();
     bufferContext.arc(p.currPos.x, p.currPos.y, 5, 0, ππ);
     bufferContext.closePath();

@@ -3,9 +3,9 @@ import Particle from '../physics/particle';
 import { IBehavior } from './';
 
 export default class ConstantForceBehavior implements IBehavior {
-  constructor(public pin: () => Vec2) {}
+  constructor(public pin: (t: number) => Vec2) {}
 
   public update(p: Particle, t: number, dt: number): Vec2 {
-    return sub(this.pin(), p.currPos);
+    return sub(this.pin(t), p.currPos);
   }
 }
