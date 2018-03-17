@@ -1,11 +1,11 @@
-import { Behavior } from '../behaviors';
+import { IBehavior } from '../behaviors';
 import Vec2, { add, clone, lerp, limit, sub } from '../geom/vec2';
 
 export default class Particle {
   public constructor(
     public currPos = Vec2.zero,
     public prevPos = clone(currPos),
-    public behaviors: Behavior[] = [],
+    public behaviors: IBehavior[] = [],
   ) {}
 
   public get currVel(): Vec2 {
@@ -26,6 +26,6 @@ export default class Particle {
 
   private nextVel(t: number, dt: number): Vec2 {
     const { behaviors, currVel } = this;
-    return behaviors.reduce((v, b) => add(v, b(this, t, dt)), currVel);
+    return behaviors.reduce((v, b) => add(v, b.update(this, t, dt)), currVel);
   }
 }

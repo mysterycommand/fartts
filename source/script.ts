@@ -1,141 +1,66 @@
 import './style.scss';
 
-import constantForceBehaviorFactory from './lib/behaviors/constant-force-behavior';
-import AngularConstraint from './lib/constraints/angular-constraint';
-import BoundsConstraint from './lib/constraints/bounds-constraint';
 import DistanceConstraint from './lib/constraints/distance-constraint';
-import Rect from './lib/geom/rect';
-import Vec2, { add, fromPolar } from './lib/geom/vec2';
-import { floor, min, random, round, toDegrees, π, ππ } from './lib/math';
+import { add, scale, sub } from './lib/geom/vec2';
+import Mouse from './lib/input/mouse';
+import { floor, min, random, saw, π, ππ } from './lib/math';
 import Aggregate from './lib/physics/aggregate';
-import Particle from './lib/physics/particle';
+import { getStepFn } from './lib/wave';
 
-const { cancelAnimationFrame: cAF, requestAnimationFrame: rAF } = window;
+import {
+  buffer,
+  bufferContext,
+  cAF,
+  canvas,
+  canvasContext,
+  rAF,
+  stageCenterX,
+  stageCenterY,
+  stageHeight,
+  stageScale,
+  stageWidth,
+} from './lib/canvas';
 
-const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
+import { puppetConstraints, puppetParticles } from './game/puppet';
+import { lAnkle, rAnkle } from './game/puppet/ankles';
+import { bounds, o } from './game/puppet/config';
+import { lElbow, rElbow } from './game/puppet/elbows';
+import { lHip, rHip } from './game/puppet/hips';
+import { lKnee, rKnee } from './game/puppet/knees';
+import { lShoulder, rShoulder } from './game/puppet/shoulders';
+import { lWrist, rWrist } from './game/puppet/wrists';
 
-const buffer = document.createElement('canvas') as HTMLCanvasElement;
-const bufferContext = buffer.getContext('2d') as CanvasRenderingContext2D;
+import lCalfSrc from './images/moon-body/small/l-calf.png';
+import lFootSrc from './images/moon-body/small/l-foot.png';
+import lForearmSrc from './images/moon-body/small/l-forearm.png';
+import lThighSrc from './images/moon-body/small/l-thigh.png';
+import lUpperSrc from './images/moon-body/small/l-upper-arm.png';
+import rCalfSrc from './images/moon-body/small/r-calf.png';
+import rFootSrc from './images/moon-body/small/r-foot.png';
+import rForearmSrc from './images/moon-body/small/r-forearm.png';
+import rThighSrc from './images/moon-body/small/r-thigh.png';
+import rUpperSrc from './images/moon-body/small/r-upper-arm.png';
+import facesSrc from './images/moon-faces-small.png';
+import phasesSrc from './images/moon-phases-small.png';
 
-const stageScale = 1;
-const stageWidth = canvas.clientWidth / stageScale;
-const stageHeight = canvas.clientHeight / stageScale;
-const stageCenterX = stageWidth / 2;
-const stageCenterY = stageHeight / 2;
+let debug = false;
 
-canvas.width = buffer.width = stageWidth;
-canvas.height = buffer.height = stageHeight;
-canvasContext.imageSmoothingEnabled = bufferContext.imageSmoothingEnabled = false;
+const images: { [key: string]: HTMLImageElement } = {};
+const phaseOffsetFn = getStepFn(saw, 5000, 0, 9);
+let horizontalOffset = 0;
+let verticalOffset = 0;
+
+function updateVerticalOffset() {
+  verticalOffset = floor(random() * 5);
+  setTimeout(updateVerticalOffset, 500 + floor(random() * 500));
+}
+updateVerticalOffset();
 
 /**
  * SIMULATION
  */
 
-const gravity = new Vec2(0, 0.2);
-const gravityBehavior = constantForceBehaviorFactory(gravity);
-
-const bounds = new Rect(new Vec2(10, 10), new Vec2(stageWidth - 10, stageHeight - 10));
-
-const origin = new Vec2(stageCenterX, stageCenterY);
-const torsoRadius = 50;
-const armLength = 65;
-const legLength = 50;
-
-const rShoulder = new Particle(add(origin, fromPolar(π * 1.25, torsoRadius)), undefined, [
-  gravityBehavior,
-]);
-const lShoulder = new Particle(add(origin, fromPolar(π * 1.75, torsoRadius)), undefined, [
-  gravityBehavior,
-]);
-const lHip = new Particle(add(origin, fromPolar(π * 0.25, torsoRadius)), undefined, [
-  gravityBehavior,
-]);
-const rHip = new Particle(add(origin, fromPolar(π * 0.75, torsoRadius)), undefined, [
-  gravityBehavior,
-]);
-const torso = new Particle(origin, undefined, [gravityBehavior]);
-
-const rElbow = new Particle(add(rShoulder.currPos, fromPolar(π * 0.65, armLength)), undefined, [
-  gravityBehavior,
-]);
-const rWrist = new Particle(add(rElbow.currPos, fromPolar(π * 0.65, armLength)), undefined, [
-  gravityBehavior,
-]);
-const rKnee = new Particle(add(rHip.currPos, fromPolar(π * 0.55, legLength)), undefined, [
-  gravityBehavior,
-]);
-const rAnkle = new Particle(add(rKnee.currPos, fromPolar(π * 0.55, legLength)), undefined, [
-  gravityBehavior,
-]);
-
-const lElbow = new Particle(add(lShoulder.currPos, fromPolar(π * 0.35, armLength)), undefined, [
-  gravityBehavior,
-]);
-const lWrist = new Particle(add(lElbow.currPos, fromPolar(π * 0.35, armLength)), undefined, [
-  gravityBehavior,
-]);
-const lKnee = new Particle(add(lHip.currPos, fromPolar(π * 0.45, legLength)), undefined, [
-  gravityBehavior,
-]);
-const lAnkle = new Particle(add(lKnee.currPos, fromPolar(π * 0.45, legLength)), undefined, [
-  gravityBehavior,
-]);
-
-const puppetParticles = [
-  rShoulder,
-  lShoulder,
-  lHip,
-  rHip,
-  torso,
-
-  rWrist,
-  rElbow,
-  rAnkle,
-  rKnee,
-  lWrist,
-  lElbow,
-  lAnkle,
-  lKnee,
-];
-
-const puppetConstraints = [
-  new DistanceConstraint(torso, rShoulder),
-  new DistanceConstraint(torso, lShoulder),
-  new DistanceConstraint(torso, rHip),
-  new DistanceConstraint(torso, lHip),
-
-  new DistanceConstraint(rShoulder, lHip),
-  new DistanceConstraint(lShoulder, rHip),
-
-  new DistanceConstraint(rShoulder, lShoulder),
-  new DistanceConstraint(lShoulder, lHip),
-  new DistanceConstraint(lHip, rHip),
-  new DistanceConstraint(rHip, rShoulder),
-
-  new DistanceConstraint(rShoulder, rElbow),
-  new DistanceConstraint(rElbow, rWrist),
-  new DistanceConstraint(lShoulder, lElbow),
-  new DistanceConstraint(lElbow, lWrist),
-
-  new DistanceConstraint(rHip, rKnee),
-  new DistanceConstraint(rKnee, rAnkle),
-  new DistanceConstraint(lHip, lKnee),
-  new DistanceConstraint(lKnee, lAnkle),
-
-  new AngularConstraint(rWrist, rElbow, rShoulder, 0.1),
-  new AngularConstraint(lWrist, lElbow, lShoulder, 0.1),
-  new AngularConstraint(rElbow, rShoulder, rHip, 0.1),
-  new AngularConstraint(lElbow, lShoulder, lHip, 0.1),
-
-  new AngularConstraint(rAnkle, rKnee, rHip),
-  new AngularConstraint(lAnkle, lKnee, lHip),
-  new AngularConstraint(rKnee, rHip, rShoulder),
-  new AngularConstraint(lKnee, lHip, lShoulder),
-
-  new BoundsConstraint(puppetParticles, bounds),
-];
-
+const mouse = new Mouse(document);
 const puppet = new Aggregate(puppetParticles, puppetConstraints);
 
 /**
@@ -167,35 +92,120 @@ function draw(i: number): void {
   bufferContext.closePath();
   bufferContext.stroke();
 
-  puppet.constraints
-    .filter((c): c is DistanceConstraint => {
-      return c instanceof DistanceConstraint;
-    })
-    .forEach(({ a, b }) => {
+  [
+    {
+      from: rAnkle,
+      to: rKnee,
+      img: images.rFoot,
+    },
+    {
+      from: lAnkle,
+      to: lKnee,
+      img: images.lFoot,
+    },
+    {
+      from: rElbow,
+      to: rWrist,
+      img: images.rForearm,
+    },
+    {
+      from: lElbow,
+      to: lWrist,
+      img: images.lForearm,
+    },
+    {
+      from: rHip,
+      to: rKnee,
+      img: images.rThigh,
+    },
+    {
+      from: lHip,
+      to: lKnee,
+      img: images.lThigh,
+    },
+    {
+      from: rKnee,
+      to: rAnkle,
+      img: images.rCalf,
+    },
+    {
+      from: lKnee,
+      to: lAnkle,
+      img: images.lCalf,
+    },
+    {
+      from: rShoulder,
+      to: rElbow,
+      img: images.rUpper,
+    },
+    {
+      from: lShoulder,
+      to: lElbow,
+      img: images.lUpper,
+    },
+  ].forEach(({ from, to, img }) => {
+    bufferContext.save();
+    bufferContext.translate(from.currPos.x - img.width / 2, from.currPos.y);
+    let angle = sub(from.currPos, to.currPos).θ;
+    if (img === images.lFoot || img === images.rFoot) {
+      angle -= π / 2;
+    } else {
+      angle += π / 2;
+    }
+    bufferContext.rotate(angle);
+    bufferContext.drawImage(img, 0, 0);
+    bufferContext.restore();
+  });
+
+  const head = add(rHip.currPos, scale(sub(lShoulder.currPos, rHip.currPos), 0.5));
+
+  bufferContext.save();
+  bufferContext.translate(head.x - 54, head.y - 54);
+  bufferContext.drawImage(images.phases, horizontalOffset * 145, 0, 108, 108, 0, 0, 108, 108);
+
+  bufferContext.drawImage(
+    images.faces,
+    horizontalOffset * 145,
+    verticalOffset * 140,
+    108,
+    108,
+    0,
+    0,
+    108,
+    108,
+  );
+  bufferContext.restore();
+
+  if (debug) {
+    puppet.constraints
+      .filter((c): c is DistanceConstraint => {
+        return c instanceof DistanceConstraint;
+      })
+      .forEach(({ a, b }) => {
+        bufferContext.save();
+
+        bufferContext.strokeStyle = '#777';
+        bufferContext.beginPath();
+        bufferContext.moveTo(a.currPos.x, a.currPos.y);
+        bufferContext.lineTo(b.currPos.x, b.currPos.y);
+        bufferContext.closePath();
+        bufferContext.stroke();
+
+        bufferContext.restore();
+      });
+
+    puppet.particles.forEach(p => {
       bufferContext.save();
 
-      bufferContext.strokeStyle = '#777';
+      bufferContext.strokeStyle = sub(mouse.currPos, p.currPos).ρ < 20 ? '#f66' : '#222';
       bufferContext.beginPath();
-      bufferContext.moveTo(a.currPos.x, a.currPos.y);
-      bufferContext.lineTo(b.currPos.x, b.currPos.y);
+      bufferContext.arc(p.currPos.x, p.currPos.y, 5, 0, ππ);
       bufferContext.closePath();
       bufferContext.stroke();
 
       bufferContext.restore();
     });
-
-  puppet.particles.forEach(p => {
-    bufferContext.save();
-
-    bufferContext.translate(p.currPos.x, p.currPos.y);
-    bufferContext.strokeStyle = '#222';
-    bufferContext.beginPath();
-    bufferContext.arc(0, 0, 5, 0, ππ);
-    bufferContext.closePath();
-    bufferContext.stroke();
-
-    bufferContext.restore();
-  });
+  }
 
   canvasContext.drawImage(buffer, 0, 0);
 }
@@ -231,6 +241,7 @@ function tick(time: number): void {
     excess -= step;
   }
 
+  horizontalOffset = phaseOffsetFn(time);
   draw(excess / step);
 }
 
@@ -249,6 +260,30 @@ function stop(): void {
   frameId = -1;
 }
 
-play();
+document.addEventListener('keyup', event => {
+  debug = !debug;
+});
 
-document.addEventListener('keydown', play);
+Promise.all(
+  Object.entries({
+    lCalf: lCalfSrc,
+    lFoot: lFootSrc,
+    lForearm: lForearmSrc,
+    lThigh: lThighSrc,
+    lUpper: lUpperSrc,
+    rCalf: rCalfSrc,
+    rFoot: rFootSrc,
+    rForearm: rForearmSrc,
+    rThigh: rThighSrc,
+    rUpper: rUpperSrc,
+    faces: facesSrc,
+    phases: phasesSrc,
+  }).map(
+    ([name, src]) =>
+      new Promise(resolve => {
+        images[name] = new Image();
+        images[name].addEventListener('load', resolve);
+        images[name].src = src;
+      }),
+  ),
+).then(play);

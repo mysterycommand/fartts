@@ -1,7 +1,11 @@
 import Vec2 from '../geom/vec2';
 import Particle from '../physics/particle';
-import { Behavior } from './';
+import { IBehavior } from './';
 
-export default function constantForceBehaviorFactory(constantForce: Vec2): Behavior {
-  return (p: Particle, t: number, dt: number): Vec2 => constantForce;
+export default class ConstantForceBehavior implements IBehavior {
+  constructor(public constantForce: Vec2) {}
+
+  public update(p: Particle, t: number, dt: number): Vec2 {
+    return this.constantForce;
+  }
 }
