@@ -13,7 +13,7 @@
 * [@kangareuben12](https://twitter.com/kangareuben12)
 * Sound effects
 
-~ ~ ~
+---
 
 [Kurt Roembke](spaceowlproductions@gmail.com)
 
