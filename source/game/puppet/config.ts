@@ -17,10 +17,10 @@ export const origin = new Vec2(stageCenterX, stageCenterY);
 export const o = new Vec2(origin.x, origin.y + 180);
 
 export const torsoRadius = 54;
-export const upperArmLength = 49;
-export const forearmLength = 77;
-export const thighLength = 84;
-export const calfLength = 85;
+export const upperArmLength = 50;
+export const forearmLength = 50;
+export const thighLength = 70;
+export const calfLength = 70;
 
 export const commonBehaviors = [
   new ConstantForceBehavior(gravity),
