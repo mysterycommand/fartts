@@ -5,7 +5,7 @@ export const { abs, acos, atan2, cos, floor, hypot, max, min, PI: π, round, sin
 export const ππ = π * 2;
 
 export function lerp(a: number, b: number, i: number): number {
-  return b + (a - b) * i;
+  return a + (b - a) * i;
 }
 
 export function randomBool(): boolean {
