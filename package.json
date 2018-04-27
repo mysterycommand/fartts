@@ -26,14 +26,14 @@
     "seedrandom": "2.4.3"
   },
   "devDependencies": {
-    "@types/jest": "22.2.2",
+    "@types/jest": "22.2.3",
     "@types/seedrandom": "2.4.27",
     "commitizen": "2.9.6",
     "coveralls": "3.0.0",
     "cz-conventional-changelog": "2.1.0",
     "identity-obj-proxy": "3.0.0",
     "jest": "22.4.2",
-    "node-sass": "4.7.2",
+    "node-sass": "4.8.3",
     "parcel-bundler": "1.6.2",
     "prettier": "1.12.1",
     "sass-lint": "1.12.1",
