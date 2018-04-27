@@ -14,13 +14,12 @@ export default class BoundsConstraint implements IConstraint {
       const isWithinHorizontalBounds = bounds.left < currPos.x && currPos.x < bounds.right;
       const isWithinVerticalBounds = bounds.top < currPos.y && currPos.y < bounds.bottom;
 
-      if (!isWithinHorizontalBounds) {
-        currPos.x = prevPos.x = min(max(bounds.left, currPos.x), bounds.right);
+      if (isWithinHorizontalBounds && isWithinVerticalBounds) {
+        return;
       }
 
-      if (!isWithinVerticalBounds) {
-        currPos.y = prevPos.y = min(max(bounds.top, currPos.y), bounds.bottom);
-      }
+      currPos.x = prevPos.x = min(max(bounds.left, currPos.x), bounds.right);
+      currPos.y = prevPos.y = min(max(bounds.top, currPos.y), bounds.bottom);
     });
   }
 }

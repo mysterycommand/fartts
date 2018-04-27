@@ -143,9 +143,9 @@ function init() {
     // particle.behaviors.push(gravity);
     // particle.behaviors.push(drag);
 
-    particle.behaviors.push(separate);
-    particle.behaviors.push(align);
-    particle.behaviors.push(cohere);
+    // particle.behaviors.push(separate);
+    // particle.behaviors.push(align);
+    // particle.behaviors.push(cohere);
   }
 }
 
@@ -163,7 +163,10 @@ function update(t: number, dt: number): void {
     // console.log(t); // tslint:disable-line
     particle.update(t, dt);
 
-    const { currPos: { x, y }, currVel } = particle;
+    const {
+      currPos: { x, y },
+      currVel,
+    } = particle;
     let move = Vec2.zero;
 
     if (y < 0 - (128 - 96) / rs) {
@@ -220,7 +223,9 @@ function draw(i: number): void {
       return a.ipos(i).y - b.ipos(i).y;
     })
     .some(particle => {
-      const { currVel: { θ, ρ } } = particle;
+      const {
+        currVel: { θ, ρ },
+      } = particle;
       const { x, y } = particle.ipos(i);
       const frame = floor(((round(toDegrees(θ + π)) + 22.5) % 360) / 45);
 
